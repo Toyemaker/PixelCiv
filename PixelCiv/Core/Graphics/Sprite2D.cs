@@ -11,8 +11,8 @@ namespace PixelCiv.Core.Graphics
 {
     public class Sprite2D : IRenderable
     {
-        public GameObject Parent { get; set; }
-
+        public IComponent Parent { get; set; }
+        public Transform2D Transform { get; private set; }
         public Texture2D Texture { get; set; }
         public Rectangle SourceRectangle { get; set; }
         public Color Color { get; set; }
@@ -25,6 +25,8 @@ namespace PixelCiv.Core.Graphics
         {
             Texture = texture;
 
+            Transform = new Transform2D(this);
+
             SourceRectangle = Texture.Bounds;
             Color = Color.White;
             Origin = new Vector2();
@@ -36,7 +38,12 @@ namespace PixelCiv.Core.Graphics
 
         public void Draw(SpriteBatch spriteBatch, GameTime gameTime)
         {
-            spriteBatch.Draw(Texture, Parent.Transform.GetGlobalPosition() * Parent.Transform.GetGlobalScale(), SourceRectangle, Color, Parent.Transform.GetGlobalRotation(), Origin, Parent.Transform.GetGlobalScale(), SpriteEffects, LayerDepth);
+            spriteBatch.Draw(Texture, Transform.GetGlobalPosition() * Transform.GetGlobalScale(), SourceRectangle, Color, Transform.GetGlobalRotation(), Origin, Transform.GetGlobalScale(), SpriteEffects, LayerDepth);
+        }
+
+        public IEnumerable<T> GetChildren<T>() where T : IComponent
+        {
+            yield return Transform is T t ? t : default;
         }
     }
 }

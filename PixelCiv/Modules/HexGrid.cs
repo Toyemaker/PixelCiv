@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using PixelCiv.Core;
 using PixelCiv.Core.Components;
+using PixelCiv.Modules.Logistics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,10 +13,9 @@ namespace PixelCiv.GameObjects
 {
     public class HexGrid : GameObject
     {
-        private Dictionary<Point, HexTile> TileDictionary;
+        public ResourceManager ResourceManager { get; set; }
 
-        private float _timer;
-        private float _tickInterval;
+        private Dictionary<Point, HexTile> TileDictionary;
 
         public HexGrid() 
         { 
@@ -32,8 +32,6 @@ namespace PixelCiv.GameObjects
                     AddComponent(tile);
                 }
             }
-
-            _tickInterval = 0.25f;
         }
 
         public bool ContainsPoint(Vector2 point)
@@ -47,25 +45,6 @@ namespace PixelCiv.GameObjects
             }
 
             return false;
-        }
-
-        public override void Update(GameTime gameTime)
-        {
-            _timer += (float)gameTime.ElapsedGameTime.TotalSeconds;
-
-            if (_timer >= _tickInterval)
-            {
-                FixedUpdate(_tickInterval);
-
-                _timer -= _tickInterval;
-            }
-
-            base.Update(gameTime);
-        }
-
-        public override void Draw(SpriteBatch spriteBatch, GameTime gameTime)
-        {
-            base.Draw(spriteBatch, gameTime);
         }
     }
 }

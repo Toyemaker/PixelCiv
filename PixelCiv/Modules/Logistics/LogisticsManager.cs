@@ -10,7 +10,7 @@ namespace PixelCiv.Modules.Logistics
 {
     public class LogisticsManager : IUpdatable
     {
-        public GameObject Parent { get; set; }
+        public IComponent Parent { get; set; }
         public bool IsActive { get; set; }
 
 
@@ -44,6 +44,11 @@ namespace PixelCiv.Modules.Logistics
             {
                 transaction.Key.ApplyTransaction(transaction.Value);
             }
+        }
+
+        public IEnumerable<T> GetChildren<T>() where T : IComponent
+        {
+            yield return default;
         }
     }
 }

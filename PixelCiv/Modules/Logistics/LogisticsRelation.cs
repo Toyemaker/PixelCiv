@@ -10,13 +10,13 @@ namespace PixelCiv.Modules.Logistics
     {
         private ITransactionable _sender;
         private ITransactionable _receiver;
-        private string _resource;
+        private ResourceType _type;
 
-        public LogisticsRelation(ITransactionable sender, ITransactionable receiver, string resource)
+        public LogisticsRelation(ITransactionable sender, ITransactionable receiver, ResourceType type)
         {
             _sender = sender;
             _receiver = receiver;
-            _resource = resource;
+            _type = type;
         }
 
         public ITransactionable GetSender()
@@ -29,24 +29,29 @@ namespace PixelCiv.Modules.Logistics
             return _receiver;
         }
 
-        public string GetResource()
+        public ResourceType GetResource()
         {
-            return _resource;
+            return _type;
         }
 
         public void ApplyTransaction(float amount)
         {
             float change = amount;
 
-            if (GetSender()[GetResource()] < amount)
+            if (!_receiver.IsTransactionable())
             {
-                change = GetSender()[GetResource()];
+                // log warning
+                return;
+            }
+            else if (_sender.GetResource(_type).Quantity < amount)
+            {
+                change = _sender.GetResource(_type).Quantity;
 
                 // log warning
             }
 
-            GetSender()[GetResource()] -= change;
-            GetReceiver()[GetResource()] += change;
+            _sender.GetResource(_type).Quantity -= change;
+            _receiver.GetResource(_type).Quantity += change;
         }
     }
 }

@@ -11,11 +11,11 @@ namespace PixelCiv.Core.Graphics
     public class Camera : ITransformable
     {
         public Transform2D Transform { get; private set; }
-        public GameObject Parent { get; set; }
+        public IComponent Parent { get; set; }
 
         public Camera()
         {
-            Transform = new Transform2D();
+            Transform = new Transform2D(this);
             Transform.Scale = new Vector2(4);
         }
 
@@ -27,6 +27,11 @@ namespace PixelCiv.Core.Graphics
         public Vector2 ConvertToWorldPosition(Vector2 pos)
         {
             return (pos - Transform.GetGlobalPosition()) / Transform.GetGlobalScale();
+        }
+
+        public IEnumerable<T> GetChildren<T>() where T : IComponent
+        {
+            yield return Transform is T t ? t : default;
         }
     }
 }

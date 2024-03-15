@@ -6,6 +6,7 @@ using PixelCiv.Core.Components;
 using PixelCiv.Core.Graphics;
 using PixelCiv.Core.UI;
 using PixelCiv.GameObjects;
+using PixelCiv.Modules.Displays;
 using PixelCiv.Modules.Logistics;
 using System;
 using System.Collections.Generic;
@@ -17,18 +18,29 @@ namespace PixelCiv.Modules.Scenes
 {
     public class TestScene
     {
+        private ResourceManager _resourceManager;
+        private LogisticsManager _logisticsManager;
+
         private GameObject _screenRoot;
         private GameObject _worldRoot;
 
         private Camera _camera;
 
+        private float _timer;
+        private float _tickInterval;
+
         public TestScene() 
         {
             _screenRoot = new GameObject();
             _screenRoot.AddComponent(new Button());
+            _screenRoot.AddComponent(_resourceManager = new ResourceManager());
+            _screenRoot.AddComponent(_logisticsManager = new LogisticsManager());
+            _screenRoot.AddComponent(new ResourceDisplay(_resourceManager).SetTransform(new Vector2(400, 0), Vector2.One, 0f));
 
             _worldRoot = new GameObject();
-            _worldRoot.AddComponent(new HexGrid());
+            HexGrid grid = new HexGrid();
+            grid.ResourceManager = _resourceManager;
+            _worldRoot.AddComponent(grid);
 
             _camera = new Camera();
         }
@@ -47,6 +59,15 @@ namespace PixelCiv.Modules.Scenes
         {
             _screenRoot.Update(gameTime);
             _worldRoot.Update(gameTime);
+
+            _timer += (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+            if (_timer >= _tickInterval)
+            {
+                _screenRoot.FixedUpdate(_tickInterval);
+                _worldRoot.FixedUpdate(_tickInterval);
+                _timer -= _tickInterval;
+            }
         }
         public void Draw(SpriteBatch spriteBatch, GameTime gameTime)
         {

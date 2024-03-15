@@ -11,7 +11,7 @@ namespace PixelCiv.Core.Components
 {
     public class GameObject : IInteractable, IUpdatable, IRenderable, ITransformable
     {
-        public GameObject Parent { get; set; }
+        public IComponent Parent { get; set; }
 
         public Transform2D Transform { get; private set; }
 
@@ -107,6 +107,15 @@ namespace PixelCiv.Core.Components
         public IEnumerable<T> GetChildren<T>() where T : IComponent
         {
             return _componentList.OfType<T>();
+        }
+
+        public GameObject SetTransform(Vector2 pos, Vector2 scale, float rot)
+        {
+            Transform.Position = pos;
+            Transform.Scale = scale;
+            Transform.Rotation = rot;
+
+            return this;
         }
     }
 }

@@ -8,6 +8,13 @@ namespace PixelCiv.Core.Components
 {
     public interface IComponent
     {
-        GameObject Parent { get; set; }
+        IComponent Parent { get; set; }
+
+        IEnumerable<T> GetChildren<T>() where T : IComponent;
+
+        T GetChild<T>() where T : IComponent
+        {
+            return GetChildren<T>().FirstOrDefault();
+        }
     }
 }

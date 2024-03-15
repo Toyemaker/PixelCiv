@@ -5,6 +5,7 @@ using PixelCiv.Core.Components;
 using PixelCiv.Core.Data;
 using PixelCiv.Core.Graphics;
 using PixelCiv.GameObjects.Structures;
+using PixelCiv.Modules.Logistics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -74,7 +75,11 @@ namespace PixelCiv.GameObjects
             {
                 if (input.IsMouseButtonPressed(MouseButton.Left))
                 {
-                    Structure house = new Structure();
+                    Warehouse house = new Warehouse();
+                    if (Parent is HexGrid grid)
+                    {
+                        grid.ResourceManager?.Add(house.Storage);
+                    }
                     AddComponent(house);
                 }
 

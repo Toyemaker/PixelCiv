@@ -6,12 +6,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using PixelCiv.Core.Components;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace PixelCiv.Core.UI
 {
     internal class Text2D : IRenderable
     {
-        public GameObject Parent { get; set; }
+        public IComponent Parent { get; set; }
+        public Transform2D Transform { get; private set; }
         public SpriteFont Font { get; set; }
         public string Text { get; set; }
         public Color Color { get; set; }
@@ -20,12 +22,10 @@ namespace PixelCiv.Core.UI
         public float LayerDepth { get; set; }
         public bool IsVisible { get; set; }
 
-        public Text2D(GameObject parent, SpriteFont font, string text)
+        public Text2D(SpriteFont font, string text)
         {
-            Parent = parent;
-
             Font = font;
-
+            Transform = new Transform2D(this);
             Text = text;
             Color = Color.Black;
             Origin = new Vector2();
@@ -37,7 +37,12 @@ namespace PixelCiv.Core.UI
 
         public void Draw(SpriteBatch spriteBatch, GameTime gameTime)
         {
-            spriteBatch.DrawString(Font, Text, Parent.Transform.GetGlobalPosition() * Parent.Transform.GetGlobalScale(), Color, Parent.Transform.GetGlobalRotation(), Origin, Parent.Transform.GetGlobalScale(), SpriteEffects, LayerDepth);
+            spriteBatch.DrawString(Font, Text, Transform.GetGlobalPosition() * Transform.GetGlobalScale(), Color, Transform.GetGlobalRotation(), Origin, Transform.GetGlobalScale(), SpriteEffects, LayerDepth);
+        }
+
+        public IEnumerable<T> GetChildren<T>() where T : IComponent
+        {
+            yield return Transform is T t ? t : default;
         }
     }
 }

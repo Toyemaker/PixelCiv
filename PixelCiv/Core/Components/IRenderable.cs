@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace PixelCiv.Core.Components
 {
-    public interface IRenderable : IComponent
+    public interface IRenderable : ITransformable
     {
         void Draw(SpriteBatch spriteBatch, GameTime gameTime);
         bool IsVisible { get; }

@@ -8,6 +8,7 @@ namespace PixelCiv.Modules.Logistics
 {
     public interface ITransactionable
     {
-        float this[string resource] { get; set; }
+        Resource GetResource(ResourceType type);
+        bool IsTransactionable();
     }
 }
