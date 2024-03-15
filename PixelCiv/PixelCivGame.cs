@@ -1,7 +1,14 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using PixelCiv.Library;
+using PixelCiv.Core;
+using PixelCiv.Core.Data;
+using PixelCiv.Core.Graphics;
+using PixelCiv.Core.UI;
+using PixelCiv.GameObjects;
+using PixelCiv.GameObjects.Structures;
+using PixelCiv.Modules.Logistics;
+using PixelCiv.Modules.Scenes;
 using System;
 using System.Diagnostics;
 
@@ -12,8 +19,8 @@ namespace PixelCiv
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
 
-        private HexGrid _grid;
-
+        private TestScene _scene;
+        private Input _input;
 
         public PixelCivGame()
         {
@@ -37,7 +44,8 @@ namespace PixelCiv
 
             GameData.Load(Content);
 
-            _grid = new HexGrid();
+            _scene = new TestScene();
+            _input = new Input();
         }
 
         protected override void Update(GameTime gameTime)
@@ -47,9 +55,12 @@ namespace PixelCiv
 
             // TODO: Add your update logic here
 
-            _grid.ContainsPoint(Mouse.GetState().Position.ToVector2());
+            _input.SetKeyboardState(Keyboard.GetState());
+            _input.SetMouseState(Mouse.GetState());
+            _input.SetMousePosition(Mouse.GetState().Position.ToVector2());
 
-            Debug.WriteLine(Mouse.GetState().Position.ToVector2());
+            _scene.Interact(_input, gameTime);
+            _scene.Update(gameTime);
 
             base.Update(gameTime);
         }
@@ -60,11 +71,7 @@ namespace PixelCiv
 
             // TODO: Add your drawing code here
 
-            _spriteBatch.Begin(SpriteSortMode.Deferred, null, SamplerState.PointClamp, null, null, null, null);
-
-            _grid.Draw(_spriteBatch, gameTime);
-
-            _spriteBatch.End();
+            _scene.Draw(_spriteBatch, gameTime);
 
             base.Draw(gameTime);
         }
