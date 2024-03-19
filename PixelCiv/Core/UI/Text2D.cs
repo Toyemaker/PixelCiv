@@ -61,23 +61,5 @@ namespace PixelCiv.Core.UI
 
             yield break;
         }
-
-        public IComponent Instantiate(IComponent parent)
-        {
-            Text2D text = new Text2D(Font)
-            {
-                Parent = parent,
-                Text = Text,
-                Color = Color,
-                Origin = Origin,
-                SpriteEffects = SpriteEffects,
-                LayerDepth = LayerDepth,
-                IsVisible = IsVisible,
-            };
-
-            text.Transform.Format(Transform);
-
-            return text;
-        }
     }
 }

@@ -9,6 +9,7 @@ namespace PixelCiv.Core.Components
 {
     public interface IComponent
     {
+        string Name { get; set; }
         IComponent Parent { get; set; }
 
         IEnumerable<T> GetChildren<T>() where T : IComponent;
@@ -17,8 +18,6 @@ namespace PixelCiv.Core.Components
         {
             return GetChildren<T>().FirstOrDefault();
         }
-
-        IComponent Instantiate(IComponent parent);
 
         bool IsEnabled { get; set; }
     }

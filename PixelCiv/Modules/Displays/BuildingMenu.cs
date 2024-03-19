@@ -1,4 +1,6 @@
-﻿using PixelCiv.Core.Components;
+﻿using Microsoft.Xna.Framework;
+using PixelCiv.Core;
+using PixelCiv.Core.Components;
 using PixelCiv.Core.UI;
 using PixelCiv.GameObjects;
 using PixelCiv.GameObjects.Structures;
@@ -18,6 +20,11 @@ namespace PixelCiv.Modules.Displays
             GetChild<GameObject>("categoryBar").AddComponent("categoryAll", new Button());
 
             AddComponent("structureBar", new GameObject());
+        }
+
+        public void ChangeBuildingCategory(Input input, GameTime gameTime)
+        {
+
         }
     }
 }

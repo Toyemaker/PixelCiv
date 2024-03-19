@@ -61,23 +61,5 @@ namespace PixelCiv.Core.Graphics
 
             yield break;
         }
-
-        public IComponent Instantiate(IComponent parent)
-        {
-            Sprite2D sprite = new Sprite2D(Texture)
-            {
-                Parent = parent,
-                SourceRectangle = SourceRectangle,
-                Color = Color,
-                Origin = Origin,
-                SpriteEffects = SpriteEffects,
-                LayerDepth = LayerDepth,
-                IsVisible = IsVisible,
-            };
-
-            sprite.Transform.Format(Transform);
-
-            return sprite;
-        }
     }
 }

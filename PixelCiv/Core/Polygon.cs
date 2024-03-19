@@ -31,16 +31,6 @@ namespace PixelCiv.Core
                 _vertices.Add(vert);
             }
         }
-        private Polygon(List<Vertex> vertices)
-        {
-            Transform = new Transform2D(this);
-            IsEnabled = true;
-
-            foreach (Vertex vert in vertices)
-            {
-                _vertices.Add(vert);
-            }
-        }
 
         public bool ContainsPoint(Vector2 point)
         {
@@ -68,19 +58,6 @@ namespace PixelCiv.Core
         public IEnumerable<T> GetChildren<T>() where T : IComponent
         {
             return _vertices.OfType<T>();
-        }
-
-        public IComponent Instantiate(IComponent parent)
-        {
-            Polygon polygon = new Polygon(_vertices)
-            {
-                Parent = parent,
-                IsEnabled = true,
-            };
-
-            polygon.Transform.Format(Transform);
-
-            return Instantiate(polygon);
         }
     }
 }

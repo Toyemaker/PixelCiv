@@ -12,6 +12,7 @@ namespace PixelCiv.Core.Components
 {
     public class GameObject : IInteractable, IUpdatable, IRenderable, ITransformable
     {
+        public string Name { get; set; }
         public IComponent Parent { get; set; }
 
         public Transform2D Transform { get; private set; }
@@ -23,7 +24,6 @@ namespace PixelCiv.Core.Components
         public bool IsEnabled { get; set; }
 
         private Dictionary<string, IComponent> _componentList;
-        private Dictionary<string, IComponent> _referenceList;
 
         public GameObject()
         {
@@ -35,7 +35,6 @@ namespace PixelCiv.Core.Components
             IsEnabled = true;
 
             _componentList = new Dictionary<string, IComponent>();
-            _referenceList = new Dictionary<string, IComponent>();
         }
 
         public void AddComponent(string name, IComponent obj)
@@ -43,6 +42,7 @@ namespace PixelCiv.Core.Components
             if (!_componentList.ContainsKey(name))
             {
                 _componentList.Add(name, obj);
+                obj.Name = name;
 
                 obj.Parent = this;
             }
@@ -51,20 +51,6 @@ namespace PixelCiv.Core.Components
         public void RemoveComponent(string name)
         {
             _componentList.Remove(name);
-        }
-
-        public void AddReference(string name, IComponent obj)
-        {
-            if (!_referenceList.ContainsKey(name))
-            {
-                _referenceList.Add(name, obj);
-
-                obj.Parent = this;
-            }
-        }
-        public void RemoveReference(string name)
-        {
-            _referenceList.Remove(name);
         }
 
         public virtual bool Interact(Input input, GameTime gameTime)
@@ -127,34 +113,6 @@ namespace PixelCiv.Core.Components
             return _componentList.Values.OfType<T>();
         }
 
-        public virtual IComponent Instantiate(IComponent parent)
-        {
-            GameObject obj = new GameObject()
-            {
-                Parent = parent,
-                IsActive = IsActive,
-                IsBlocker = IsBlocker,
-                IsInteractable = IsInteractable,
-                IsVisible = IsVisible,
-                IsEnabled = IsEnabled,
-            };
-
-            obj.Transform.Format(Transform.Position, Transform.Scale, Transform.Rotation);
-
-            foreach (KeyValuePair<string, IComponent> component in _componentList)
-            {
-                IComponent comp = component.Value.Instantiate(obj);
-                obj._componentList.Add(component.Key, comp);
-            }
-
-            foreach (KeyValuePair<string, IComponent> component in _referenceList)
-            {
-                obj._referenceList.Add(component.Key, component.Value);
-            }
-
-            return obj;
-        }
-
         public T GetChild<T>(string name) where T : IComponent
         {
             return _componentList.ContainsKey(name) && _componentList[name] is T t ? t : default;
@@ -163,11 +121,6 @@ namespace PixelCiv.Core.Components
         public bool ContainsChild(string name)
         {
             return _componentList.ContainsKey(name);
-        }
-
-        public T GetReference<T>(string name) where T : IComponent
-        {
-            return _referenceList.ContainsKey(name) && _referenceList[name] is T t ? t : default;
         }
     }
 }

@@ -30,18 +30,5 @@ namespace PixelCiv.Core
             Parent = parent;
             Transform = new Transform2D(this);
         }
-
-        public IComponent Instantiate(IComponent parent)
-        {
-            Vertex vert = new Vertex(parent)
-            {
-                Parent = parent,
-                IsEnabled = IsEnabled,
-            };
-
-            vert.Transform.Format(Transform);
-
-            return vert;
-        }
     }
 }

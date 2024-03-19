@@ -60,12 +60,5 @@ namespace PixelCiv.Core
         {
             yield break;
         }
-
-        public IComponent Instantiate(IComponent parent)
-        {
-            Transform2D transform = new Transform2D(parent);
-            transform.Format(this);
-            return transform;
-        }
     }
 }
