@@ -8,28 +8,53 @@ using System.Threading.Tasks;
 
 namespace PixelCiv.Core
 {
-    public class Polygon : GameObject
+    public class Polygon : ITransformable
     {
-        public List<Vector2> Vertices;
+        public IComponent Parent { get; set; }
+        public bool IsEnabled { get; set; }
+        public Transform2D Transform { get; private set; }
 
-        public Polygon(List<Vector2> verts)
+        private List<Vertex> _vertices;
+
+        public Polygon(List<Vector2> vertices)
         {
-            Vertices = verts;
+            Transform = new Transform2D(this);
+            IsEnabled = true;
+
+            _vertices = new List<Vertex>();
+
+            foreach (Vector2 vec in vertices)
+            {
+                Vertex vert = new Vertex(this);
+                vert.Transform.Position = vec;
+
+                _vertices.Add(vert);
+            }
+        }
+        private Polygon(List<Vertex> vertices)
+        {
+            Transform = new Transform2D(this);
+            IsEnabled = true;
+
+            foreach (Vertex vert in vertices)
+            {
+                _vertices.Add(vert);
+            }
         }
 
         public bool ContainsPoint(Vector2 point)
         {
             bool result = false;
 
-            int j = Vertices.Count - 1;
-            for (int i = 0; i < Vertices.Count; i++)
+            int j = _vertices.Count - 1;
+            for (int i = 0; i < _vertices.Count; i++)
             {
-                if (GetY(Vertices[i]) < point.Y && GetY(Vertices[j]) >= point.Y ||
-                    GetY(Vertices[j]) < point.Y && GetY(Vertices[i]) >= point.Y)
+                if (_vertices[i].Transform.GetGlobalPosition().Y < point.Y && _vertices[j].Transform.GetGlobalPosition().Y >= point.Y ||
+                    _vertices[j].Transform.GetGlobalPosition().Y < point.Y && _vertices[i].Transform.GetGlobalPosition().Y >= point.Y)
                 {
-                    if (GetX(Vertices[i]) + (point.Y - GetY(Vertices[i])) /
-                        (GetY(Vertices[j]) - GetY(Vertices[i])) *
-                        (GetX(Vertices[j]) - GetX(Vertices[i])) < point.X)
+                    if (_vertices[i].Transform.GetGlobalPosition().X + (point.Y - _vertices[i].Transform.GetGlobalPosition().Y) /
+                        (_vertices[j].Transform.GetGlobalPosition().Y - _vertices[i].Transform.GetGlobalPosition().Y) *
+                        (_vertices[j].Transform.GetGlobalPosition().X - _vertices[i].Transform.GetGlobalPosition().X) < point.X)
                     {
                         result = !result;
                     }
@@ -40,14 +65,22 @@ namespace PixelCiv.Core
             return result;
         }
 
-        private float GetX(Vector2 vert)
+        public IEnumerable<T> GetChildren<T>() where T : IComponent
         {
-            return vert.X + Transform.GetGlobalPosition().X;
+            return _vertices.OfType<T>();
         }
 
-        private float GetY(Vector2 vert)
+        public IComponent Instantiate(IComponent parent)
         {
-            return vert.Y + Transform.GetGlobalPosition().Y;
+            Polygon polygon = new Polygon(_vertices)
+            {
+                Parent = parent,
+                IsEnabled = true,
+            };
+
+            polygon.Transform.Format(Transform);
+
+            return Instantiate(polygon);
         }
     }
 }

@@ -13,17 +13,17 @@ namespace PixelCiv.GameObjects.Structures
 {
     public class Warehouse : Structure
     {
-        public ResourceStorage Storage { get; private set; }
         private int _counter;
 
 
         public Warehouse()
         {
-            Storage = new ResourceStorage()
+            AddComponent("storage", new ResourceStorage()
             {
                 { ResourceCategory.Categories["Ore"].GetResourceType("Copper") }
-            };
-            _sprite.Color = Color.Green;
+            });
+
+            GetChild<Sprite2D>("sprite").Color = Color.Green;
         }
 
         public override void FixedUpdate(float tickInterval)
@@ -31,7 +31,7 @@ namespace PixelCiv.GameObjects.Structures
             _counter++;
             if (_counter >= 40)
             {
-                Storage.GetResource(ResourceCategory.Categories["Ore"].GetResourceType("Copper")).Quantity += 1;
+                GetChild<ResourceStorage>("storage").GetResource(ResourceCategory.Categories["Ore"].GetResourceType("Copper")).Quantity += 1;
                 _counter -= 40;
             }            
 

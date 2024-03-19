@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -16,5 +17,9 @@ namespace PixelCiv.Core.Components
         {
             return GetChildren<T>().FirstOrDefault();
         }
+
+        IComponent Instantiate(IComponent parent);
+
+        bool IsEnabled { get; set; }
     }
 }

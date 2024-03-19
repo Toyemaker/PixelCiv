@@ -11,6 +11,7 @@ namespace PixelCiv.Modules.Logistics
     {
         public IComponent Parent { get; set; }
         public bool IsActive { get; set; }
+        public bool IsEnabled { get; set; }
 
         private List<ResourceStorage> _storageList;
 
@@ -22,6 +23,10 @@ namespace PixelCiv.Modules.Logistics
         public void Add(ResourceStorage storage)
         {
             _storageList.Add(storage);
+        }
+        public void Remove(ResourceStorage storage)
+        {
+            _storageList.Remove(storage);
         }
 
         public float GetCombinedResourceTotal(ResourceType type)
@@ -38,7 +43,24 @@ namespace PixelCiv.Modules.Logistics
 
         public IEnumerable<T> GetChildren<T>() where T : IComponent
         {
-            yield return default;
+            yield break;
+        }
+
+        public IComponent Instantiate(IComponent parent)
+        {
+            ResourceManager manager = new ResourceManager()
+            {
+                Parent = parent,
+                IsActive = IsActive,
+                IsEnabled = IsEnabled,
+            };
+
+            foreach(ResourceStorage storage in _storageList)
+            {
+                manager._storageList.Add(storage);
+            }
+
+            return manager;
         }
     }
 }

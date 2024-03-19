@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using PixelCiv.Core;
 using PixelCiv.Core.Components;
+using PixelCiv.Modules.Displays;
 using PixelCiv.Modules.Logistics;
 using System;
 using System.Collections.Generic;
@@ -13,38 +14,25 @@ namespace PixelCiv.GameObjects
 {
     public class HexGrid : GameObject
     {
-        public ResourceManager ResourceManager { get; set; }
-
-        private Dictionary<Point, HexTile> TileDictionary;
+        private Dictionary<Point, HexTile> _tileDictionary;
 
         public HexGrid() 
         { 
-            TileDictionary = new Dictionary<Point, HexTile>();
+            _tileDictionary = new Dictionary<Point, HexTile>();
 
-            for (int y = 0; y < 10; y++)
+            for (int y = 0; y < 20; y++)
             {
                 for (int x = 0; x < 4; x++)
                 {
                     HexTile tile = new HexTile();
                     tile.Transform.Position = new Vector2(x * 22 + (y + 1) % 2 * 11, y * 4);
 
-                    TileDictionary.Add(new Point(x, y), tile);
-                    AddComponent(tile);
-                }
-            }
-        }
-
-        public bool ContainsPoint(Vector2 point)
-        {
-            foreach (KeyValuePair<Point, HexTile> tile in TileDictionary.OrderBy(a => a.Key.Y).ThenBy(a => a.Key.X).Reverse())
-            {
-                if (tile.Value.ContainsPoint(point))
-                {
-                    return true;
+                    _tileDictionary.Add(new Point(x, y), tile);
+                    AddComponent("(" + x + ", " + y + ")", tile);
                 }
             }
 
-            return false;
+            AddComponent("resourceManager", new ResourceManager());
         }
     }
 }

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace PixelCiv.Core.Components
 {
@@ -19,8 +20,10 @@ namespace PixelCiv.Core.Components
         public bool IsBlocker { get; set; }
         public bool IsVisible { get; set; }
         public bool IsActive { get; set; }
+        public bool IsEnabled { get; set; }
 
-        private List<IComponent> _componentList;
+        private Dictionary<string, IComponent> _componentList;
+        private Dictionary<string, IComponent> _referenceList;
 
         public GameObject()
         {
@@ -29,31 +32,46 @@ namespace PixelCiv.Core.Components
             IsBlocker = true;
             IsVisible = true;
             IsActive = true;
+            IsEnabled = true;
 
-            _componentList = new List<IComponent>();
+            _componentList = new Dictionary<string, IComponent>();
+            _referenceList = new Dictionary<string, IComponent>();
         }
 
-        public void AddComponent(IComponent obj)
+        public void AddComponent(string name, IComponent obj)
         {
-            if (!_componentList.Contains(obj))
+            if (!_componentList.ContainsKey(name))
             {
-                _componentList.Add(obj);
+                _componentList.Add(name, obj);
 
-                obj.
-                Parent = this;
+                obj.Parent = this;
             }
         }
 
-        public void RemoveComponent(IComponent obj)
+        public void RemoveComponent(string name)
         {
-            _componentList.Add(obj);
+            _componentList.Remove(name);
+        }
+
+        public void AddReference(string name, IComponent obj)
+        {
+            if (!_referenceList.ContainsKey(name))
+            {
+                _referenceList.Add(name, obj);
+
+                obj.Parent = this;
+            }
+        }
+        public void RemoveReference(string name)
+        {
+            _referenceList.Remove(name);
         }
 
         public virtual bool Interact(Input input, GameTime gameTime)
         {
             bool result = false;
 
-            foreach (IInteractable component in _componentList.OfType<IInteractable>().Reverse())
+            foreach (IInteractable component in _componentList.Values.Where(a => a.IsEnabled).OfType<IInteractable>().Reverse())
             {
                 if (component.IsInteractable && component.Interact(input, gameTime))
                 {
@@ -71,7 +89,7 @@ namespace PixelCiv.Core.Components
 
         public virtual void Update(GameTime gameTime)
         {
-            foreach (IUpdatable component in _componentList.OfType<IUpdatable>())
+            foreach (IUpdatable component in _componentList.Values.Where(a => a.IsEnabled).OfType<IUpdatable>())
             {
                 if (component.IsActive)
                 {
@@ -82,7 +100,7 @@ namespace PixelCiv.Core.Components
 
         public virtual void FixedUpdate(float tickInterval)
         {
-            foreach (IUpdatable component in _componentList.OfType<IUpdatable>())
+            foreach (IUpdatable component in _componentList.Values.Where(a => a.IsEnabled).OfType<IUpdatable>())
             {
                 component.FixedUpdate(tickInterval);
             }
@@ -90,7 +108,7 @@ namespace PixelCiv.Core.Components
 
         public virtual void Draw(SpriteBatch spriteBatch, GameTime gameTime)
         {
-            foreach (IRenderable component in _componentList.OfType<IRenderable>())
+            foreach (IRenderable component in _componentList.Values.Where(a => a.IsEnabled).OfType<IRenderable>())
             {
                 if (component.IsVisible)
                 {
@@ -106,16 +124,50 @@ namespace PixelCiv.Core.Components
 
         public IEnumerable<T> GetChildren<T>() where T : IComponent
         {
-            return _componentList.OfType<T>();
+            return _componentList.Values.OfType<T>();
         }
 
-        public GameObject SetTransform(Vector2 pos, Vector2 scale, float rot)
+        public virtual IComponent Instantiate(IComponent parent)
         {
-            Transform.Position = pos;
-            Transform.Scale = scale;
-            Transform.Rotation = rot;
+            GameObject obj = new GameObject()
+            {
+                Parent = parent,
+                IsActive = IsActive,
+                IsBlocker = IsBlocker,
+                IsInteractable = IsInteractable,
+                IsVisible = IsVisible,
+                IsEnabled = IsEnabled,
+            };
 
-            return this;
+            obj.Transform.Format(Transform.Position, Transform.Scale, Transform.Rotation);
+
+            foreach (KeyValuePair<string, IComponent> component in _componentList)
+            {
+                IComponent comp = component.Value.Instantiate(obj);
+                obj._componentList.Add(component.Key, comp);
+            }
+
+            foreach (KeyValuePair<string, IComponent> component in _referenceList)
+            {
+                obj._referenceList.Add(component.Key, component.Value);
+            }
+
+            return obj;
+        }
+
+        public T GetChild<T>(string name) where T : IComponent
+        {
+            return _componentList.ContainsKey(name) && _componentList[name] is T t ? t : default;
+        }
+
+        public bool ContainsChild(string name)
+        {
+            return _componentList.ContainsKey(name);
+        }
+
+        public T GetReference<T>(string name) where T : IComponent
+        {
+            return _referenceList.ContainsKey(name) && _referenceList[name] is T t ? t : default;
         }
     }
 }

@@ -20,6 +20,17 @@ namespace PixelCiv.Core.Graphics
         public SpriteEffects SpriteEffects { get; set; }
         public float LayerDepth { get; set; }
         public bool IsVisible { get; set; }
+        public bool IsEnabled
+        {
+            get
+            {
+                return IsVisible;
+            }
+            set
+            {
+                IsVisible = value;
+            }
+        }
 
         public Sprite2D(Texture2D texture)
         {
@@ -43,7 +54,30 @@ namespace PixelCiv.Core.Graphics
 
         public IEnumerable<T> GetChildren<T>() where T : IComponent
         {
-            yield return Transform is T t ? t : default;
+            if (Transform is T t)
+            {
+                yield return t;
+            }
+
+            yield break;
+        }
+
+        public IComponent Instantiate(IComponent parent)
+        {
+            Sprite2D sprite = new Sprite2D(Texture)
+            {
+                Parent = parent,
+                SourceRectangle = SourceRectangle,
+                Color = Color,
+                Origin = Origin,
+                SpriteEffects = SpriteEffects,
+                LayerDepth = LayerDepth,
+                IsVisible = IsVisible,
+            };
+
+            sprite.Transform.Format(Transform);
+
+            return sprite;
         }
     }
 }

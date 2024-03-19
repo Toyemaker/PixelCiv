@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 using PixelCiv.Core;
 using PixelCiv.Core.Components;
 using PixelCiv.Core.Data;
@@ -8,6 +9,7 @@ using PixelCiv.GameObjects.Structures;
 using PixelCiv.Modules.Logistics;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -16,16 +18,11 @@ namespace PixelCiv.GameObjects
 {
     public class HexTile : GameObject
     {
-        private Sprite2D _sprite;
-
-        private Polygon _boundingBox;
-
         private bool _isHovered;
 
         public HexTile()
         {
-            _sprite = new Sprite2D(GameData.BaseTileTexture);
-            AddComponent(_sprite);
+            AddComponent("sprite", new Sprite2D(GameData.BaseTileTexture));
 
             List<Vector2> vertices = new List<Vector2>()
             {
@@ -39,48 +36,47 @@ namespace PixelCiv.GameObjects
                 new Vector2 (4, 2),
             };
 
-            _boundingBox = new Polygon(vertices);
-
-            AddComponent(_boundingBox);
+            AddComponent("boundingBox", new Polygon(vertices));
         }
 
         public override void Update(GameTime gameTime)
         {
             if (_isHovered)
             {
-                _sprite.Color = Color.Red;
+                GetChild<Sprite2D>("sprite").Color = Color.Red;
                 _isHovered = false;
             }
             else
             {
-                _sprite.Color = Color.White;
+                GetChild<Sprite2D>("sprite").Color = Color.White;
             }
 
             base.Update(gameTime);
         }
 
-        public bool ContainsPoint(Vector2 point)
-        {
-            if (_boundingBox.ContainsPoint(point))
-            {
-                return true;
-            }
-
-            return false;
-        }
-
         public override bool Interact(Input input, GameTime gameTime)
         {
-            if (ContainsPoint(input.GetMousePosition()))
+            if (GetChild<Polygon>("boundingBox").ContainsPoint(input.GetMousePosition()))
             {
-                if (input.IsMouseButtonPressed(MouseButton.Left))
+                if (ContainsChild("house") == default)
                 {
-                    Warehouse house = new Warehouse();
+                    if (input.IsMouseButtonPressed(MouseButton.Left))
+                    {
+                        Warehouse house = new Warehouse();
+                        if (Parent is HexGrid grid)
+                        {
+                            grid.GetChild<ResourceManager>("resourceManager").Add(house.GetChild<ResourceStorage>("storage"));
+                        }
+                        AddComponent("house", house);
+                    }   
+                }
+                else if (input.IsMouseButtonPressed(MouseButton.Right))
+                {
                     if (Parent is HexGrid grid)
                     {
-                        grid.ResourceManager?.Add(house.Storage);
+                        grid.GetChild<ResourceManager>("resourceManager")?.Remove(GetChild<Warehouse>("house").GetChild<ResourceStorage>("storage"));
                     }
-                    AddComponent(house);
+                    RemoveComponent("house");
                 }
 
                 _isHovered = true;

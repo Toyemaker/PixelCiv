@@ -13,13 +13,9 @@ namespace PixelCiv.Core.UI
 {
     public class Button : GameObject
     {
-        private Sprite2D _sprite;
-        private Polygon _polygon;
-
         public Button()
         {
-            _sprite = new Sprite2D(GameData.BaseButtonTexture);
-            AddComponent(_sprite);
+            AddComponent("buttonSprite", new Sprite2D(GameData.BaseButtonTexture));
 
             List<Vector2> vertices = new List<Vector2>()
             {
@@ -29,29 +25,27 @@ namespace PixelCiv.Core.UI
                 new Vector2 (15, 0),
             };
 
-            _polygon = new Polygon(vertices);
-
-            AddComponent(_polygon);
+            AddComponent("boundingBox", new Polygon(vertices));
         }
 
         public override bool Interact(Input input, GameTime gameTime)
         {
-            if (_polygon.ContainsPoint(input.GetMousePosition()))
+            if (GetChild<Polygon>("boundingBox").ContainsPoint(input.GetMousePosition()))
             {
                 if (input.IsMouseButtonDown(MouseButton.Left))
                 {
-                    _sprite.Color = Color.Green;
+                    GetChild<Sprite2D>("buttonSprite").Color = Color.Green;
                 }
                 else
                 {
-                    _sprite.Color = Color.Red;
+                    GetChild<Sprite2D>("buttonSprite").Color = Color.Red;
                 }
 
                 return true;
             }
             else
             {
-                _sprite.Color = Color.White;
+                GetChild<Sprite2D>("buttonSprite").Color = Color.White;
             }
 
             return base.Interact(input, gameTime);

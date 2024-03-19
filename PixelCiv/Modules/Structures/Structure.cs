@@ -14,12 +14,9 @@ namespace PixelCiv.GameObjects.Structures
 {
     public class Structure : GameObject
     {
-        protected Sprite2D _sprite;
-
         public Structure()
         {
-            _sprite = new Sprite2D(GameData.BaseHouseTexture);
-            AddComponent(_sprite);
+            AddComponent("sprite", new Sprite2D(GameData.BaseHouseTexture));
         }
     }
 }

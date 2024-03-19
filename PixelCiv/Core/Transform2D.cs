@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static System.Formats.Asn1.AsnWriter;
 
 namespace PixelCiv.Core
 {
@@ -15,6 +16,7 @@ namespace PixelCiv.Core
         public Vector2 Position { get; set; }
         public Vector2 Scale { get; set; }
         public float Rotation { get; set; }
+        public bool IsEnabled { get; set; }
 
         public Transform2D(IComponent parent) : this(parent, default)
         {
@@ -43,10 +45,27 @@ namespace PixelCiv.Core
         {
             return Rotation + (Parent.Parent != null && Parent.Parent is ITransformable parent ? parent.Transform.GetGlobalRotation() : 0f);
         }
+        public void Format(Transform2D transform)
+        {
+            Format(transform.Position, transform.Scale, transform.Rotation);
+        }
+        public void Format(Vector2 pos, Vector2 scale, float rot)
+        {
+            Position = pos;
+            Scale = scale;
+            Rotation = rot;
+        }
 
         public IEnumerable<T> GetChildren<T>() where T : IComponent
         {
-            yield return default;
+            yield break;
+        }
+
+        public IComponent Instantiate(IComponent parent)
+        {
+            Transform2D transform = new Transform2D(parent);
+            transform.Format(this);
+            return transform;
         }
     }
 }

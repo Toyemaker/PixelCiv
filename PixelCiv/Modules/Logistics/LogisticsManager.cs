@@ -12,7 +12,7 @@ namespace PixelCiv.Modules.Logistics
     {
         public IComponent Parent { get; set; }
         public bool IsActive { get; set; }
-
+        public bool IsEnabled { get; set; }
 
         private Dictionary<LogisticsRelation, float> _transactionDict;
 
@@ -48,7 +48,24 @@ namespace PixelCiv.Modules.Logistics
 
         public IEnumerable<T> GetChildren<T>() where T : IComponent
         {
-            yield return default;
+            yield break;
+        }
+
+        public IComponent Instantiate(IComponent parent)
+        {
+            LogisticsManager logisticsManager = new LogisticsManager()
+            {
+                Parent = parent,
+                IsActive = IsActive,
+                IsEnabled = IsEnabled,
+            };
+
+            foreach (KeyValuePair<LogisticsRelation, float> pair in _transactionDict)
+            {
+                logisticsManager._transactionDict.Add(pair.Key, pair.Value);
+            }
+
+            return logisticsManager;
         }
     }
 }

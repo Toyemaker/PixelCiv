@@ -14,12 +14,11 @@ namespace PixelCiv.Modules.Displays
 {
     public class ResourceDisplay : GameObject
     {
-        public ResourceManager ResourceManager { get; set; }
         private Dictionary<ResourceType, Text2D> _resourceTextDict;
 
         public ResourceDisplay(ResourceManager manager)
         {
-            ResourceManager = manager;
+            AddReference("resourceManager", manager);
             _resourceTextDict = new Dictionary<ResourceType, Text2D>();
 
             int height = 0;
@@ -32,7 +31,7 @@ namespace PixelCiv.Modules.Displays
                     text.Transform.Position = new Vector2(0, 20 * height++);
 
                     _resourceTextDict.Add(type, text);
-                    AddComponent(text);
+                    AddComponent(type.Name, text);
                 }
             }
         }
@@ -43,7 +42,7 @@ namespace PixelCiv.Modules.Displays
             {
                 foreach (ResourceType type in category)
                 {
-                    _resourceTextDict[type].Text = type.Name + ": " + ResourceManager.GetCombinedResourceTotal(type);
+                    _resourceTextDict[type].Text = type.Name + ": " + GetReference<ResourceManager>("resourceManager").GetCombinedResourceTotal(type);
                 }
             }
 

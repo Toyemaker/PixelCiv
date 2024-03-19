@@ -18,9 +18,6 @@ namespace PixelCiv.Modules.Scenes
 {
     public class TestScene
     {
-        private ResourceManager _resourceManager;
-        private LogisticsManager _logisticsManager;
-
         private GameObject _screenRoot;
         private GameObject _worldRoot;
 
@@ -32,17 +29,19 @@ namespace PixelCiv.Modules.Scenes
         public TestScene() 
         {
             _screenRoot = new GameObject();
-            _screenRoot.AddComponent(new Button());
-            _screenRoot.AddComponent(_resourceManager = new ResourceManager());
-            _screenRoot.AddComponent(_logisticsManager = new LogisticsManager());
-            _screenRoot.AddComponent(new ResourceDisplay(_resourceManager).SetTransform(new Vector2(400, 0), Vector2.One, 0f));
+            _screenRoot.AddComponent("button", new Button());
+            _screenRoot.AddComponent("logisticsManager", new LogisticsManager());
+
 
             _worldRoot = new GameObject();
             HexGrid grid = new HexGrid();
-            grid.ResourceManager = _resourceManager;
-            _worldRoot.AddComponent(grid);
+            _worldRoot.AddComponent("grid", grid);
+            _screenRoot.AddComponent("display", new ResourceDisplay(grid.GetChild<ResourceManager>("resourceManager")));
+            _screenRoot.GetChild<ResourceDisplay>("display").Transform.Position = new Vector2(400, 0);
 
             _camera = new Camera();
+
+            _tickInterval = 0.05f;
         }
 
         public bool Interact(Input input, GameTime gameTime)

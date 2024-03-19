@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using PixelCiv.Core.Components;
 using static System.Net.Mime.MediaTypeNames;
+using PixelCiv.Core.Graphics;
 
 namespace PixelCiv.Core.UI
 {
@@ -21,8 +22,19 @@ namespace PixelCiv.Core.UI
         public SpriteEffects SpriteEffects { get; set; }
         public float LayerDepth { get; set; }
         public bool IsVisible { get; set; }
+        public bool IsEnabled
+        {
+            get
+            {
+                return IsVisible;
+            }
+            set
+            {
+                IsVisible = value;
+            }
+        }
 
-        public Text2D(SpriteFont font, string text)
+        public Text2D(SpriteFont font, string text = "")
         {
             Font = font;
             Transform = new Transform2D(this);
@@ -42,7 +54,30 @@ namespace PixelCiv.Core.UI
 
         public IEnumerable<T> GetChildren<T>() where T : IComponent
         {
-            yield return Transform is T t ? t : default;
+            if (Transform is T t)
+            {
+                yield return t;
+            }
+
+            yield break;
+        }
+
+        public IComponent Instantiate(IComponent parent)
+        {
+            Text2D text = new Text2D(Font)
+            {
+                Parent = parent,
+                Text = Text,
+                Color = Color,
+                Origin = Origin,
+                SpriteEffects = SpriteEffects,
+                LayerDepth = LayerDepth,
+                IsVisible = IsVisible,
+            };
+
+            text.Transform.Format(Transform);
+
+            return text;
         }
     }
 }
