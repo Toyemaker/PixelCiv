@@ -36,7 +36,7 @@ namespace PixelCiv.Core
         }
         public Vector2 GetGlobalPosition()
         {
-            return Position * GetGlobalScale() + (Parent.Parent != null && Parent.Parent is ITransformable parent ? parent.Transform.GetGlobalPosition() : Vector2.Zero);
+            return Parent.Parent != null && Parent.Parent is ITransformable parent ? parent.Transform.GetGlobalPosition() + Position * parent.Transform.GetGlobalScale() : Position;
         }
         public Vector2 GetGlobalScale()
         {

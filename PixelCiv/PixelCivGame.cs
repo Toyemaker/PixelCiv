@@ -42,7 +42,7 @@ namespace PixelCiv
 
             // TODO: use this.Content to load your game content here
 
-            GameData.Load(Content);
+            GameData.Load(Content, GraphicsDevice);
 
             _scene = new TestScene();
             _input = new Input();

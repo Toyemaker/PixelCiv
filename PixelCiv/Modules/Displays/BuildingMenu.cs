@@ -22,16 +22,23 @@ namespace PixelCiv.Modules.Displays
             {
                 GameObject category = new GameObject();
                 {
-                    Button button = new Button();
+                    Vector2 vec = GameData.BaseFont.MeasureString("All");
+
+                    int xPadding = 16;
+                    int yPadding = 4;
+
+                    Sprite2D buttonSprite = new Sprite2D(GameData.Pixel);
+                    buttonSprite.Transform.Scale = new Vector2(vec.X + 2 * xPadding, vec.Y + 2 * yPadding);
+                    buttonSprite.Color = Color.Gray;
+                    Button button = new Button(buttonSprite);
                     {
                         button.OnInteractEvent += ChangeBuildingCategory;
-                        button.Transform.Position = new Vector2(10, 10);
-                        button.Transform.Scale = new Vector2(4, 2);
+                        button.Transform.Position = new Vector2(0, 0);
                         category.AddComponent("allButton", button);
                     }
                     Text2D text = new Text2D(GameData.BaseFont, "All");
                     {
-                        text.Transform.Position = new Vector2(10, 10);
+                        text.Transform.Position = new Vector2(xPadding, yPadding);
                         category.AddComponent("text", text);
                     }
 
@@ -40,7 +47,7 @@ namespace PixelCiv.Modules.Displays
                 category = new GameObject();
                 {
                     category.Transform.Position = new Vector2(100, 0);
-                    Button button = new Button();
+                    Button button = new Button(new Sprite2D(GameData.BaseButtonTexture));
                     {
                         button.OnInteractEvent += ChangeBuildingCategory;
                         category.AddComponent("oreButton", button);
@@ -62,7 +69,7 @@ namespace PixelCiv.Modules.Displays
                 GameObject structure = new GameObject();
                 {
                     structure.AddAttribute("categoryAll");
-                    Button button = new Button();
+                    Button button = new Button(new Sprite2D(GameData.BaseButtonTexture));
                     {
                         structure.AddComponent("houseButton", button);
                     }
@@ -78,7 +85,7 @@ namespace PixelCiv.Modules.Displays
                     structure.AddAttribute("categoryAll");
                     structure.AddAttribute("categoryOre");
                     structure.Transform.Position = new Vector2(100, 0);
-                    Button button = new Button();
+                    Button button = new Button(new Sprite2D(GameData.BaseButtonTexture));
                     {
                         structure.AddComponent("oreButton", button);
                     }

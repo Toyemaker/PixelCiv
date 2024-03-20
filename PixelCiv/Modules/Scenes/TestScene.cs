@@ -29,7 +29,6 @@ namespace PixelCiv.Modules.Scenes
         public TestScene() 
         {
             _screenRoot = new GameObject();
-            _screenRoot.AddComponent("button", new Button());
             _screenRoot.AddComponent("logisticsManager", new LogisticsManager());
             _screenRoot.AddComponent("buildingMenu", new BuildingMenu());
 

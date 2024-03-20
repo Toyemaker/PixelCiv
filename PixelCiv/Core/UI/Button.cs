@@ -15,16 +15,16 @@ namespace PixelCiv.Core.UI
     {
         public event Action<Input, GameTime, Button> OnInteractEvent;
 
-        public Button()
+        public Button(Sprite2D sprite)
         {
-            AddComponent("buttonSprite", new Sprite2D(GameData.BaseButtonTexture));
+            AddComponent("buttonSprite", sprite);
 
             List<Vector2> vertices = new List<Vector2>()
             {
-                new Vector2 (0, 0),
-                new Vector2 (0, 15),
-                new Vector2 (15, 15),
-                new Vector2 (15, 0),
+                new Vector2(sprite.SourceRectangle.Left * sprite.Transform.GetGlobalScale().X, sprite.SourceRectangle.Top * sprite.Transform.GetGlobalScale().Y),
+                new Vector2 (sprite.SourceRectangle.Left * sprite.Transform.GetGlobalScale().X, sprite.SourceRectangle.Bottom * sprite.Transform.GetGlobalScale().Y),
+                new Vector2 (sprite.SourceRectangle.Right * sprite.Transform.GetGlobalScale().X, sprite.SourceRectangle.Bottom * sprite.Transform.GetGlobalScale().Y),
+                new Vector2 (sprite.SourceRectangle.Right * sprite.Transform.GetGlobalScale().X, sprite.SourceRectangle.Top * sprite.Transform.GetGlobalScale().Y),
             };
 
             AddComponent("boundingBox", new Polygon(vertices));
@@ -48,7 +48,7 @@ namespace PixelCiv.Core.UI
             }
             else
             {
-                GetChild<Sprite2D>("buttonSprite").Color = Color.White;
+                GetChild<Sprite2D>("buttonSprite").Color = Color.Gray;
             }
 
             return base.Interact(input, gameTime);

@@ -26,9 +26,8 @@ namespace PixelCiv.Core
             yield break;
         }
 
-        public Vertex(IComponent parent)
+        public Vertex()
         {
-            Parent = parent;
             Transform = new Transform2D(this);
         }
     }

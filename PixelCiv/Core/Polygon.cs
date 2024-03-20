@@ -26,9 +26,9 @@ namespace PixelCiv.Core
 
             foreach (Vector2 vec in vertices)
             {
-                Vertex vert = new Vertex(this);
+                Vertex vert = new Vertex();
                 vert.Transform.Position = vec;
-
+                vert.Parent = this;
                 _vertices.Add(vert);
             }
         }
