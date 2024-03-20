@@ -10,6 +10,7 @@ namespace PixelCiv.Modules.Logistics
 {
     public class LogisticsManager : IUpdatable
     {
+        public string Name { get; set; }
         public IComponent Parent { get; set; }
         public bool IsActive { get; set; }
         public bool IsEnabled { get; set; }

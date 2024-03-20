@@ -10,6 +10,7 @@ namespace PixelCiv.Core
 {
     public class Vertex : ITransformable
     {
+        public string Name { get; set; }
         public IComponent Parent { get; set; }
         public bool IsEnabled { get; set; }
 

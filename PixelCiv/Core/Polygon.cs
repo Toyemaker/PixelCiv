@@ -10,6 +10,7 @@ namespace PixelCiv.Core
 {
     public class Polygon : ITransformable
     {
+        public string Name { get; set; }
         public IComponent Parent { get; set; }
         public bool IsEnabled { get; set; }
         public Transform2D Transform { get; private set; }

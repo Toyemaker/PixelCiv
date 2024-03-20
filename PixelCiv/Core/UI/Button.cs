@@ -13,7 +13,7 @@ namespace PixelCiv.Core.UI
 {
     public class Button : GameObject
     {
-        public Action<Input, GameTime> OnInteractEvent { get; private set; }
+        public event Action<Input, GameTime, Button> OnInteractEvent;
 
         public Button()
         {
@@ -37,7 +37,7 @@ namespace PixelCiv.Core.UI
                 if (input.IsMouseButtonDown(MouseButton.Left))
                 {
                     GetChild<Sprite2D>("buttonSprite").Color = Color.Green;
-                    OnInteractEvent?.Invoke(input, gameTime);
+                    OnInteractEvent?.Invoke(input, gameTime, this);
                 }
                 else
                 {

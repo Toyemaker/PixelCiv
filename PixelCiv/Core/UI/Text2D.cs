@@ -13,6 +13,7 @@ namespace PixelCiv.Core.UI
 {
     internal class Text2D : IRenderable
     {
+        public string Name { get; set; }
         public IComponent Parent { get; set; }
         public Transform2D Transform { get; private set; }
         public SpriteFont Font { get; set; }
@@ -49,7 +50,7 @@ namespace PixelCiv.Core.UI
 
         public void Draw(SpriteBatch spriteBatch, GameTime gameTime)
         {
-            spriteBatch.DrawString(Font, Text, Transform.GetGlobalPosition() * Transform.GetGlobalScale(), Color, Transform.GetGlobalRotation(), Origin, Transform.GetGlobalScale(), SpriteEffects, LayerDepth);
+            spriteBatch.DrawString(Font, Text, Transform.GetGlobalPosition(), Color, Transform.GetGlobalRotation(), Origin, Transform.GetGlobalScale(), SpriteEffects, LayerDepth);
         }
 
         public IEnumerable<T> GetChildren<T>() where T : IComponent

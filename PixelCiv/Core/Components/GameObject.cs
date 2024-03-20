@@ -10,7 +10,7 @@ using System.Xml.Linq;
 
 namespace PixelCiv.Core.Components
 {
-    public class GameObject : IInteractable, IUpdatable, IRenderable, ITransformable
+    public class GameObject : IInteractable, IUpdatable, IRenderable, ITransformable, IAttributable
     {
         public string Name { get; set; }
         public IComponent Parent { get; set; }
@@ -24,6 +24,7 @@ namespace PixelCiv.Core.Components
         public bool IsEnabled { get; set; }
 
         private Dictionary<string, IComponent> _componentList;
+        private List<string> _attributeList;
 
         public GameObject()
         {
@@ -35,6 +36,7 @@ namespace PixelCiv.Core.Components
             IsEnabled = true;
 
             _componentList = new Dictionary<string, IComponent>();
+            _attributeList = new List<string>();
         }
 
         public void AddComponent(string name, IComponent obj)
@@ -42,8 +44,8 @@ namespace PixelCiv.Core.Components
             if (!_componentList.ContainsKey(name))
             {
                 _componentList.Add(name, obj);
-                obj.Name = name;
 
+                obj.Name = name;
                 obj.Parent = this;
             }
         }
@@ -121,6 +123,21 @@ namespace PixelCiv.Core.Components
         public bool ContainsChild(string name)
         {
             return _componentList.ContainsKey(name);
+        }
+
+        public bool HasAttribute(string name)
+        {
+            return _attributeList.Contains(name);
+        }
+
+        public void AddAttribute(string name)
+        {
+            _attributeList.Add(name);
+        }
+
+        public void RemoveAttribute(string name)
+        {
+            _attributeList.Remove(name);
         }
     }
 }

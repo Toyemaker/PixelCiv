@@ -12,6 +12,7 @@ namespace PixelCiv.Core
 {
     public class Transform2D : IComponent
     {
+        public string Name { get; set; }
         public IComponent Parent { get; set; }
         public Vector2 Position { get; set; }
         public Vector2 Scale { get; set; }
@@ -35,7 +36,7 @@ namespace PixelCiv.Core
         }
         public Vector2 GetGlobalPosition()
         {
-            return Position + (Parent.Parent != null && Parent.Parent is ITransformable parent ? parent.Transform.GetGlobalPosition() : Vector2.Zero);
+            return Position * GetGlobalScale() + (Parent.Parent != null && Parent.Parent is ITransformable parent ? parent.Transform.GetGlobalPosition() : Vector2.Zero);
         }
         public Vector2 GetGlobalScale()
         {

@@ -10,6 +10,7 @@ namespace PixelCiv.Modules.Logistics
 {
     public class ResourceStorage : ITransactionable, IEnumerable<Resource>, IComponent
     {
+        public string Name { get; set; }
         private List<Resource> _resourceList;
         public float MaxCapacity { get; set; }
         public IComponent Parent { get; set; }
