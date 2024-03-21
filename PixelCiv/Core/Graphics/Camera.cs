@@ -12,7 +12,7 @@ namespace PixelCiv.Core.Graphics
     {
         public Camera()
         {
-            Transform.Scale = new Vector2(4);
+            Transform.Scale = new Vector2(1);
         }
 
         public Matrix GetTransform()

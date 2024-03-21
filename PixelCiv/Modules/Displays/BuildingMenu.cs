@@ -4,8 +4,9 @@ using PixelCiv.Core.Components;
 using PixelCiv.Core.Data;
 using PixelCiv.Core.Graphics;
 using PixelCiv.Core.UI;
-using PixelCiv.GameObjects;
 using PixelCiv.GameObjects.Structures;
+using PixelCiv.Modules.Logistics;
+using PixelCiv.Modules.Tiles;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,89 +17,32 @@ namespace PixelCiv.Modules.Displays
 {
     public class BuildingMenu : GameObject
     {
-        public BuildingMenu()
+        public HexGrid HexGrid { get; set; }
+
+        private float _categoryBarWidth;
+        private float _categoryBarHeight;
+        private float _structureBarWidth;
+
+        public BuildingMenu(HexGrid hexGrid)
         {
-            GameObject categoryBar = new GameObject();
-            {
-                GameObject category = new GameObject();
-                {
-                    Vector2 vec = GameData.BaseFont.MeasureString("All");
+            HexGrid = hexGrid;
 
-                    int xPadding = 16;
-                    int yPadding = 4;
+            AddComponent("categoryBar", new GameObject());
+            AddComponent("structureBar", new GameObject());
 
-                    Sprite2D buttonSprite = new Sprite2D(GameData.Pixel);
-                    buttonSprite.Transform.Scale = new Vector2(vec.X + 2 * xPadding, vec.Y + 2 * yPadding);
-                    buttonSprite.Color = Color.Gray;
-                    Button button = new Button(buttonSprite);
-                    {
-                        button.OnInteractEvent += ChangeBuildingCategory;
-                        button.Transform.Position = new Vector2(0, 0);
-                        category.AddComponent("allButton", button);
-                    }
-                    Text2D text = new Text2D(GameData.BaseFont, "All");
-                    {
-                        text.Transform.Position = new Vector2(xPadding, yPadding);
-                        category.AddComponent("text", text);
-                    }
+            AddCategory("All");
+            AddCategory("Ore");
+            AddCategory("Housing");
 
-                    categoryBar.AddComponent("categoryAll", category);
-                }
-                category = new GameObject();
-                {
-                    category.Transform.Position = new Vector2(100, 0);
-                    Button button = new Button(new Sprite2D(GameData.BaseButtonTexture));
-                    {
-                        button.OnInteractEvent += ChangeBuildingCategory;
-                        category.AddComponent("oreButton", button);
-                    }
-                    Text2D text = new Text2D(GameData.BaseFont, "Ore");
-                    {
-                        category.AddComponent("text", text);
-                    }
+            AddStructure<Warehouse>("Warehouse", "categoryAll", "categoryOre", "categoryHousing");
+            AddStructure<Warehouse>("Gathering Hut", "categoryAll", "categoryHousing");
+            AddStructure<Warehouse>("Copper Mine", "categoryAll", "categoryOre");
+            GetChild<GameObject>("structureBar").Transform.Position = new Vector2(0, _categoryBarHeight);            
+        }
 
-                    categoryBar.AddComponent("categoryOre", category);
-                }
-
-                AddComponent("categoryBar", categoryBar);
-            }
-
-            GameObject structureBar = new GameObject();
-            {
-                structureBar.Transform.Position = new Vector2(0, 100);
-                GameObject structure = new GameObject();
-                {
-                    structure.AddAttribute("categoryAll");
-                    Button button = new Button(new Sprite2D(GameData.BaseButtonTexture));
-                    {
-                        structure.AddComponent("houseButton", button);
-                    }
-                    Sprite2D sprite = new Sprite2D(GameData.BaseHouseTexture);
-                    {
-                        sprite.Color = Color.Red;
-                        structure.AddComponent("houseSprite", sprite);
-                    }
-                    structureBar.AddComponent("categoryAll", structure);
-                }
-                structure = new GameObject();
-                {
-                    structure.AddAttribute("categoryAll");
-                    structure.AddAttribute("categoryOre");
-                    structure.Transform.Position = new Vector2(100, 0);
-                    Button button = new Button(new Sprite2D(GameData.BaseButtonTexture));
-                    {
-                        structure.AddComponent("oreButton", button);
-                    }
-                    Sprite2D sprite = new Sprite2D(GameData.BaseHouseTexture);
-                    {
-                        sprite.Color = Color.Green;
-                        structure.AddComponent("oreSprite", sprite);
-                    }
-                    structureBar.AddComponent("categoryOre", structure);
-                }
-
-                AddComponent("structureBar", structureBar);
-            }
+        public override void Update(GameTime gameTime)
+        {
+            base.Update(gameTime);
         }
 
         public void ChangeBuildingCategory(Input input, GameTime gameTime, Button button)
@@ -109,13 +53,73 @@ namespace PixelCiv.Modules.Displays
             {
                 if (obj.HasAttribute(button.Parent.Name))
                 {
-                    obj.Transform.Position = new Vector2(x++ * 100, 0);
+                    obj.Transform.Position = new Vector2(x++ * 64, 0);
                     obj.IsEnabled = true;
                 }
                 else
                 {
                     obj.IsEnabled = false;
                 }
+            }
+        }
+
+        public void AddStructure<T>(string name, params string[] categories) where T : Structure
+        {
+            GameObject obj = new GameObject();
+            {
+                obj.Transform.Position = new Vector2(_structureBarWidth, 0);
+                _structureBarWidth += 64;
+                foreach (string str in categories)
+                {
+                    obj.AddAttribute(str);
+                }
+                Button button = new Button(new Sprite2D(GameData.Pixel));
+                {
+                    button.Transform.Scale = new Vector2(64);
+                    button.OnInteractEvent += (a, b, c) =>
+                    {
+                        HexGrid.AddComponent("placeStructure", Activator.CreateInstance<T>());
+                    };
+                    obj.AddComponent("button", button);
+                }
+                Sprite2D sprite = new Sprite2D(GameData.BaseHouseTexture);
+                {
+                    sprite.Transform.Scale = new Vector2(4);
+                    sprite.Color = Color.Red;
+                    obj.AddComponent("sprite", sprite);
+                }
+                GetChild<GameObject>("structureBar").AddComponent(name, obj);
+            }
+        }
+
+        public void AddCategory(string name)
+        {
+            GameObject category = new GameObject();
+            {
+                Vector2 vec = GameData.BaseFont.MeasureString(name);
+
+                int xPadding = 16;
+                int yPadding = 4;
+
+                Sprite2D buttonSprite = new Sprite2D(GameData.Pixel);
+                buttonSprite.Transform.Scale = new Vector2(vec.X + 2 * xPadding, vec.Y + 2 * yPadding);
+                buttonSprite.Color = Color.Gray;
+                Button button = new Button(buttonSprite);
+                {
+                    button.OnInteractEvent += ChangeBuildingCategory;
+                    category.AddComponent("button", button);
+                }
+                Text2D text = new Text2D(GameData.BaseFont, name);
+                {
+                    text.Transform.Position = new Vector2(xPadding, yPadding);
+                    category.AddComponent("text", text);
+                }
+
+                category.Transform.Position = new Vector2(_categoryBarWidth, 0);
+                _categoryBarWidth += vec.X + 2 * xPadding;
+                _categoryBarHeight = vec.Y + 2 * yPadding;
+
+                GetChild<GameObject>("categoryBar").AddComponent("category" + name, category);
             }
         }
     }

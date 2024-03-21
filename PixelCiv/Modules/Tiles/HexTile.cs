@@ -14,7 +14,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PixelCiv.GameObjects
+namespace PixelCiv.Modules.Tiles
 {
     public class HexTile : GameObject
     {
@@ -58,25 +58,22 @@ namespace PixelCiv.GameObjects
         {
             if (GetChild<Polygon>("boundingBox").ContainsPoint(input.GetMousePosition()))
             {
-                if (ContainsChild("house") == default)
+                if (Parent != null && Parent is HexGrid grid && grid.GetChild<GameObject>("placeStructure") != default)
                 {
                     if (input.IsMouseButtonPressed(MouseButton.Left))
                     {
-                        Warehouse house = new Warehouse();
-                        if (Parent is HexGrid grid)
+                        AddComponent("structure", grid.GetChild<Structure>("placeStructure"));
+                        GetChild<Structure>("structure").Transform.Position = new Vector2();
+                        if (GetChild<Structure>("structure").ContainsChild("storage"))
                         {
-                            grid.GetChild<ResourceManager>("resourceManager").Add(house.GetChild<ResourceStorage>("storage"));
+                            grid.GetChild<ResourceManager>("resourceManager").Add(GetChild<Structure>("structure").GetChild<ResourceStorage>("storage"));
                         }
-                        AddComponent("house", house);
-                    }   
-                }
-                else if (input.IsMouseButtonPressed(MouseButton.Right))
-                {
-                    if (Parent is HexGrid grid)
-                    {
-                        grid.GetChild<ResourceManager>("resourceManager")?.Remove(GetChild<Warehouse>("house").GetChild<ResourceStorage>("storage"));
+                        grid.RemoveComponent("placeStructure");
                     }
-                    RemoveComponent("house");
+                    else
+                    {
+                        grid.GetChild<Structure>("placeStructure").Transform.Position = Transform.Position;
+                    }
                 }
 
                 _isHovered = true;

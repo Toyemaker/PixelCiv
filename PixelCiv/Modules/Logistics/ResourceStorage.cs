@@ -8,41 +8,44 @@ using System.Threading.Tasks;
 
 namespace PixelCiv.Modules.Logistics
 {
-    public class ResourceStorage : ITransactionable, IEnumerable<Resource>, IComponent
+    public class ResourceStorage : ITransactionable, IEnumerable<float>, IComponent
     {
         public string Name { get; set; }
-        private List<Resource> _resourceList;
+        private Dictionary<string, Dictionary<string, float>> _resourceDict;
         public float MaxCapacity { get; set; }
         public IComponent Parent { get; set; }
         public bool IsEnabled { get; set; }
 
         public ResourceStorage() 
         {
-            _resourceList = new List<Resource>();
+            _resourceDict = new Dictionary<string, Dictionary<string, float>>();
+        }
+
+        public float this[string category, string type]
+        {
+            get
+            {
+                return (_resourceDict.ContainsKey(category) && _resourceDict[category].ContainsKey(type)) ? _resourceDict[category][type] : 0;
+            }
+            set
+            {
+                Add(category, type, value);
+            }
         }
 
         public float GetCapacity()
         {
             float capacity = 0;
 
-            foreach (Resource resource in _resourceList)
+            foreach (KeyValuePair<string, Dictionary<string, float>> category in _resourceDict)
             {
-                capacity += resource.Quantity;
+                foreach (KeyValuePair<string, float> resource in category.Value)
+                {
+                    capacity += resource.Value;
+                }
             }
             
             return capacity;
-        }
-        public Resource GetResource(ResourceType type)
-        {
-            return _resourceList.Find(a => a.Type == type);
-        }
-
-        public void TransferAllResources(ResourceStorage destination)
-        {
-            foreach (Resource resource in _resourceList)
-            {
-                destination.Add(resource);
-            }
         }
 
         public bool IsTransactionable()
@@ -50,30 +53,16 @@ namespace PixelCiv.Modules.Logistics
             return GetCapacity() > MaxCapacity;
         }
 
-        public void Add(ResourceType type, float quantity = 0)
+        public void Add(string category, string type, float quantity = 0)
         {
-            if (_resourceList.Exists(a => a.Type != type))
+            if (_resourceDict.ContainsKey(category))
             {
-                // log warning
-
-                return;
+                _resourceDict[category][type] = quantity;
             }
-
-            _resourceList.Add(new Resource(type, quantity));
-        }
-        public void Add(Resource resource)
-        {
-            Add(resource.Type, resource.Quantity);
-        }
-
-        public IEnumerator<Resource> GetEnumerator()
-        {
-            return _resourceList.GetEnumerator();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
+            else
+            {
+                _resourceDict.Add(category, new Dictionary<string, float>() { { type, quantity } });
+            }
         }
 
         public IEnumerable<T> GetChildren<T>() where T : IComponent
@@ -81,21 +70,20 @@ namespace PixelCiv.Modules.Logistics
             yield break;
         }
 
-        public IComponent Instantiate(IComponent parent)
+        public IEnumerator<float> GetEnumerator()
         {
-            ResourceStorage storage = new ResourceStorage()
+            foreach (KeyValuePair<string, Dictionary<string, float>> category in _resourceDict)
             {
-                Parent = parent,
-                MaxCapacity = MaxCapacity,
-                IsEnabled = IsEnabled,
-            };
-
-            foreach (Resource resource in _resourceList)
-            {
-                storage.Add(new Resource(resource.Type, resource.Quantity));
+                foreach (KeyValuePair<string, float> resource in category.Value)
+                {
+                    yield return resource.Value;
+                }
             }
+        }
 
-            return storage;
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
         }
     }
 }

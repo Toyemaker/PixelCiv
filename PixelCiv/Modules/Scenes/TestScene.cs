@@ -5,9 +5,9 @@ using PixelCiv.Core;
 using PixelCiv.Core.Components;
 using PixelCiv.Core.Graphics;
 using PixelCiv.Core.UI;
-using PixelCiv.GameObjects;
 using PixelCiv.Modules.Displays;
 using PixelCiv.Modules.Logistics;
+using PixelCiv.Modules.Tiles;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,7 +30,6 @@ namespace PixelCiv.Modules.Scenes
         {
             _screenRoot = new GameObject();
             _screenRoot.AddComponent("logisticsManager", new LogisticsManager());
-            _screenRoot.AddComponent("buildingMenu", new BuildingMenu());
 
 
             _worldRoot = new GameObject();
@@ -38,6 +37,9 @@ namespace PixelCiv.Modules.Scenes
             _worldRoot.AddComponent("grid", grid);
             _screenRoot.AddComponent("display", new ResourceDisplay(grid.GetChild<ResourceManager>("resourceManager")));
             _screenRoot.GetChild<ResourceDisplay>("display").Transform.Position = new Vector2(400, 0);
+
+            _screenRoot.AddComponent("buildingMenu", new BuildingMenu(_worldRoot.GetChild<HexGrid>("grid")));
+            _screenRoot.GetChild<GameObject>("buildingMenu").Transform.Position = new Vector2(0, 480 - 86);
 
             _camera = new Camera();
 

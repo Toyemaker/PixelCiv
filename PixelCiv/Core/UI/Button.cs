@@ -15,6 +15,9 @@ namespace PixelCiv.Core.UI
     {
         public event Action<Input, GameTime, Button> OnInteractEvent;
 
+        private bool _isHovered;
+        private bool _isPressed;
+
         public Button(Sprite2D sprite)
         {
             AddComponent("buttonSprite", sprite);
@@ -30,25 +33,46 @@ namespace PixelCiv.Core.UI
             AddComponent("boundingBox", new Polygon(vertices));
         }
 
-        public override bool Interact(Input input, GameTime gameTime)
+        public override void Update(GameTime gameTime)
         {
-            if (GetChild<Polygon>("boundingBox").ContainsPoint(input.GetMousePosition()))
+            if (_isHovered)
             {
-                if (input.IsMouseButtonDown(MouseButton.Left))
+                if (_isPressed)
                 {
                     GetChild<Sprite2D>("buttonSprite").Color = Color.Green;
-                    OnInteractEvent?.Invoke(input, gameTime, this);
                 }
                 else
                 {
                     GetChild<Sprite2D>("buttonSprite").Color = Color.Red;
                 }
-
-                return true;
             }
             else
             {
                 GetChild<Sprite2D>("buttonSprite").Color = Color.Gray;
+            }
+
+            _isHovered = false;
+
+            base.Update(gameTime);
+        }
+
+        public override bool Interact(Input input, GameTime gameTime)
+        {
+            if (GetChild<Polygon>("boundingBox").ContainsPoint(input.GetMousePosition()))
+            {
+                if (input.IsMouseButtonPressed(MouseButton.Left))
+                {
+                    OnInteractEvent?.Invoke(input, gameTime, this);
+                    _isPressed = true;
+                }
+                else if (input.IsMouseButtonUp(MouseButton.Left))
+                {
+                    _isPressed = false;
+                }
+
+                _isHovered = true;
+
+                return true;
             }
 
             return base.Interact(input, gameTime);

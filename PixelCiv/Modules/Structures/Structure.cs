@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 using PixelCiv.Core.Components;
 using PixelCiv.Core.Data;
 using PixelCiv.Core.Graphics;
+using PixelCiv.Modules.Logistics;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;

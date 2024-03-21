@@ -30,13 +30,13 @@ namespace PixelCiv.Modules.Logistics
             _storageList.Remove(storage);
         }
 
-        public float GetCombinedResourceTotal(ResourceType type)
+        public float GetCombinedResourceTotal(string category, string type)
         {
             float amount = 0;
 
             foreach (ResourceStorage storage in _storageList)
             {
-                amount += storage.GetResource(type).Quantity;
+                amount += storage[category, type];
             }
 
             return amount;

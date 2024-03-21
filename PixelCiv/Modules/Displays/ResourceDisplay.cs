@@ -16,35 +16,35 @@ namespace PixelCiv.Modules.Displays
     {
         public ResourceManager ResourceManager { get; set; }
 
-        private Dictionary<ResourceType, Text2D> _resourceTextDict;
+        private Dictionary<string, Dictionary<string, Text2D>> _resourceTextDict;
 
         public ResourceDisplay(ResourceManager manager)
         {
             ResourceManager = manager;
-            _resourceTextDict = new Dictionary<ResourceType, Text2D>();
 
-            int height = 0;
-
-            foreach (ResourceCategory category in ResourceCategory.Categories.Values)
+            _resourceTextDict = new Dictionary<string, Dictionary<string, Text2D>>
             {
-                foreach (ResourceType type in category)
-                {
-                    Text2D text = new Text2D(GameData.BaseFont, "");
-                    text.Transform.Position = new Vector2(0, 20 * height++);
+                { "Ore", new Dictionary<string, Text2D>() }
+            };
 
-                    _resourceTextDict.Add(type, text);
-                    AddComponent(type.Name, text);
+            _resourceTextDict["Ore"].Add("Copper", new Text2D(GameData.BaseFont));
+
+            foreach (KeyValuePair<string, Dictionary<string, Text2D>> category in _resourceTextDict)
+            {
+                foreach (KeyValuePair<string, Text2D> text2D in category.Value)
+                {
+                    AddComponent("text" + category.Key + text2D.Key, _resourceTextDict[category.Key][text2D.Key]);
                 }
             }
         }
 
         public override void FixedUpdate(float tickInterval)
         {
-            foreach (ResourceCategory category in ResourceCategory.Categories.Values)
+            foreach (KeyValuePair<string, Dictionary<string, Text2D>> category in _resourceTextDict)
             {
-                foreach (ResourceType type in category)
+                foreach (KeyValuePair<string, Text2D> text2D in category.Value)
                 {
-                    _resourceTextDict[type].Text = type.Name + ": " + ResourceManager.GetCombinedResourceTotal(type);
+                    text2D.Value.Text = text2D.Key + ": " + ResourceManager.GetCombinedResourceTotal(category.Key, text2D.Key);
                 }
             }
 

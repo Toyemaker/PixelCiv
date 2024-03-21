@@ -20,7 +20,7 @@ namespace PixelCiv.GameObjects.Structures
         {
             AddComponent("storage", new ResourceStorage()
             {
-                { ResourceCategory.Categories["Ore"].GetResourceType("Copper") }
+                
             });
 
             GetChild<Sprite2D>("sprite").Color = Color.Green;
@@ -31,7 +31,7 @@ namespace PixelCiv.GameObjects.Structures
             _counter++;
             if (_counter >= 40)
             {
-                GetChild<ResourceStorage>("storage").GetResource(ResourceCategory.Categories["Ore"].GetResourceType("Copper")).Quantity += 1;
+                GetChild<ResourceStorage>("storage")["Ore", "Copper"] += 1;
                 _counter -= 40;
             }            
 
