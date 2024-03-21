@@ -18,6 +18,8 @@ namespace PixelCiv.Modules.Tiles
 {
     public class HexTile : GameObject
     {
+        public Biome Biome { get; set; }
+
         private bool _isHovered;
 
         public HexTile()
@@ -41,16 +43,6 @@ namespace PixelCiv.Modules.Tiles
 
         public override void Update(GameTime gameTime)
         {
-            if (_isHovered)
-            {
-                GetChild<Sprite2D>("sprite").Color = Color.Red;
-                _isHovered = false;
-            }
-            else
-            {
-                GetChild<Sprite2D>("sprite").Color = Color.White;
-            }
-
             base.Update(gameTime);
         }
 
