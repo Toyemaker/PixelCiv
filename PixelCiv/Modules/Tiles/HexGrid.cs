@@ -15,27 +15,118 @@ namespace PixelCiv.Modules.Tiles
     public class HexGrid : GameObject
     {
         private Dictionary<Point, HexTile> _tileDictionary;
-
-        private Dictionary<string, Dictionary<string, int>> _generationWeightDict;
+        private Dictionary<Biome, List<Biome>> _biomeWeightList;
 
         private int _gridRadius;
 
         public HexGrid()
         {
             _tileDictionary = new Dictionary<Point, HexTile>();
-            _generationWeightDict = new Dictionary<string, Dictionary<string, int>>()
+            _biomeWeightList = new Dictionary<Biome, List<Biome>>()
             {
-                {
-                    "grass", new Dictionary<string, int>()
+                { 
+                    Biome.Coastal, new List<Biome>()
                     {
-                        { "desert", 1 },
-                        { "grass", 10 },
-                        { "forest", 2 },
-                        { "water", 0 },
-                        { "beach", 4 },
-
+                        Biome.Coastal,
+                        Biome.Desert,
+                        Biome.Grassland,
+                        Biome.Ocean,
+                        Biome.Swamp,
+                        Biome.Tundra,
                     }
-                }
+                },
+                {
+                    Biome.Desert, new List<Biome>()
+                    {
+                        Biome.Coastal,
+                        Biome.Desert,
+                        Biome.Grassland,
+                        Biome.Mountains,
+                    }
+                },
+                {
+                    Biome.Forest, new List<Biome>()
+                    {
+                        Biome.Forest,
+                        Biome.Grassland,
+                        Biome.Jungle,
+                        Biome.Mountains,
+                        Biome.Swamp,
+                        Biome.Taiga,
+                    }
+                },
+                {
+                    Biome.Grassland, new List<Biome>()
+                    {
+                        Biome.Coastal,
+                        Biome.Desert,
+                        Biome.Grassland,
+                        Biome.Mountains,
+                        Biome.Tundra,
+                    }
+                },
+                {
+                    Biome.Jungle, new List<Biome>()
+                    {
+                        Biome.Forest,
+                        Biome.Jungle,
+                        Biome.Mountains,
+                        Biome.Swamp,
+                    }
+                },
+                {
+                    Biome.Mountains, new List<Biome>()
+                    {
+                        Biome.Desert,
+                        Biome.Forest,
+                        Biome.Grassland,
+                        Biome.Jungle,
+                        Biome.Mountains,
+                        Biome.Swamp,
+                        Biome.Taiga,
+                        Biome.Tundra,
+                    }
+                },
+                {
+                    Biome.Ocean, new List<Biome>()
+                    {
+                        Biome.Ocean,
+                        Biome.Coastal,
+                        Biome.Swamp,
+                    }
+                },
+                {
+                    Biome.Swamp, new List<Biome>()
+                    {
+                        Biome.Coastal,
+                        Biome.Forest,
+                        Biome.Jungle,
+                        Biome.Mountains,
+                        Biome.Ocean,
+                        Biome.Swamp,
+                        Biome.Tundra,
+                    }
+                },
+                {
+                    Biome.Taiga, new List<Biome>()
+                    {
+                        Biome.Forest,
+                        Biome.Mountains,
+                        Biome.Taiga,
+                        Biome.Tundra,
+                    }
+                },
+                {
+                    Biome.Tundra, new List<Biome>()
+                    {
+                        Biome.Coastal,
+                        Biome.Grassland,
+                        Biome.Mountains,
+                        Biome.Swamp,
+                        Biome.Taiga,
+                        Biome.Tundra,
+                    }
+                },
             };
 
             _gridRadius = 10;
@@ -61,15 +152,52 @@ namespace PixelCiv.Modules.Tiles
                     _tileDictionary.Add(new Point(x, y), tile);
                 }
             }
-
-            //int xPos = x + _gridRadius;
-            //int yPos = y + _gridRadius;
-
-            //HexTile tile = new HexTile();
-            //tile.Transform.Position = new Vector2(xPos * 22 + yPos % 2 * 11, yPos * 4);
-
-            //AddComponent("(" + x + ", " + y + ")", tile);
-            //_tileDictionary.Add(new Point(x, y), tile);
         }
+
+        public IEnumerable<HexTile> GetAdjacentTiles(Point point)
+        {
+            if (_tileDictionary.ContainsKey(point))
+            {
+                if (_tileDictionary.ContainsKey(point - new Point(0, -1)))
+                {
+                    yield return _tileDictionary[point - new Point(0, -1)];
+                }
+                if (_tileDictionary.ContainsKey(point - new Point(1, -1)))
+                {
+                    yield return _tileDictionary[point - new Point(1, -1)];
+                }
+                if (_tileDictionary.ContainsKey(point - new Point(1, 0)))
+                {
+                    yield return _tileDictionary[point - new Point(1, 0)];
+                }
+                if (_tileDictionary.ContainsKey(point - new Point(0, 1)))
+                {
+                    yield return _tileDictionary[point - new Point(0, 1)];
+                }
+                if (_tileDictionary.ContainsKey(point - new Point(-1, 1)))
+                {
+                    yield return _tileDictionary[point - new Point(-1, 1)];
+                }
+                if (_tileDictionary.ContainsKey(point - new Point(-1, 0)))
+                {
+                    yield return _tileDictionary[point - new Point(-1, 0)];
+                }
+            }
+
+        }
+    }
+
+    public enum Biome
+    {
+        Coastal,
+        Desert,
+        Forest,
+        Grassland,
+        Jungle,
+        Mountains,
+        Ocean,
+        Swamp,
+        Taiga,
+        Tundra,
     }
 }
