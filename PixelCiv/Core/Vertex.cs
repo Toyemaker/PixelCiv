@@ -22,8 +22,6 @@ namespace PixelCiv.Core
             {
                 yield return t;
             }
-
-            yield break;
         }
 
         public Vertex()

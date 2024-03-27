@@ -26,6 +26,8 @@ namespace PixelCiv.Modules.Scenes
         private float _timer;
         private float _tickInterval;
 
+        private int _counter;
+
         public TestScene() 
         {
             _screenRoot = new GameObject();
@@ -48,6 +50,51 @@ namespace PixelCiv.Modules.Scenes
 
         public bool Interact(Input input, GameTime gameTime)
         {
+            HexGrid grid = _worldRoot.GetChild<HexGrid>("grid");
+            if (input.IsKeyPressed(Keys.Space))
+            {
+                Random random = new Random();
+
+                if (_counter < 1)
+                {
+                    // altitude
+                    for (int i = 0; i < 10; i++)
+                    {
+                        int y = random.Next(-grid._gridRadius, grid._gridRadius + 1);
+                        int x = random.Next(Math.Max(-(grid._gridRadius + y), -grid._gridRadius), Math.Min(grid._gridRadius - y, grid._gridRadius) + 1);
+                        //grid.Spread(new Point(x, y), 0f, 1f, 0f, 8);
+                    }
+
+                    grid.Spread(new Point(0, 0), 0f, 1f, 0f, 8);
+                }
+                else if (_counter < 2)
+                {
+                    grid.Spread(new Point(0, -10), 1f, 0f, 0f, 20);
+                    grid.Spread(new Point(0, -10), 0f, 1f, 0f, 8);
+                    grid.Spread(new Point(0, 10), 1f, 0f, 0f, 20);
+                    grid.Spread(new Point(0, 10), 0f, 1f, 0f, 8);
+                }
+                else
+                {
+                    // humidity
+                    for (int i = 0; i < 10; i++)
+                    {
+                        int y = random.Next(-grid._gridRadius, grid._gridRadius + 1);
+                        int x = random.Next(Math.Max(-(grid._gridRadius + y), -grid._gridRadius), Math.Min(grid._gridRadius - y, grid._gridRadius) + 1);
+
+                        grid.Spread(new Point(x, y), 0f, 0f, 1f, 8);
+                    }
+                }
+
+                _counter++;
+            }
+            else if (input.IsKeyPressed(Keys.LeftControl))
+            {
+                foreach (HexTile tile in grid.GetChildren<HexTile>())
+                {
+                    tile.GetChild<Sprite2D>("sprite").Color = grid.GetBiomeColor(tile.Temperature, tile.Altitude, tile.Humidity);
+                }
+            }
             if (!_screenRoot.Interact(input, gameTime))
             {
                 input.SetMousePosition(_camera.ConvertToWorldPosition(Mouse.GetState().Position.ToVector2()));

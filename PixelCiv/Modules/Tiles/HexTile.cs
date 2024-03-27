@@ -18,13 +18,16 @@ namespace PixelCiv.Modules.Tiles
 {
     public class HexTile : GameObject
     {
-        public Biome Biome { get; set; }
+        public float Altitude { get; set; }
+        public float Temperature { get; set; }
+        public float Humidity { get; set; }
 
-        private bool _isHovered;
+        public bool IsModified { get; set; }
 
         public HexTile()
         {
             AddComponent("sprite", new Sprite2D(GameData.BaseTileTexture));
+            GetChild<Sprite2D>("sprite").Color = Color.Black;
 
             List<Vector2> vertices = new List<Vector2>()
             {
@@ -67,8 +70,6 @@ namespace PixelCiv.Modules.Tiles
                         grid.GetChild<Structure>("placeStructure").Transform.Position = Transform.Position;
                     }
                 }
-
-                _isHovered = true;
 
                 return true;
             }

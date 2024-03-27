@@ -59,8 +59,6 @@ namespace PixelCiv.Core.Graphics
             {
                 yield return t;
             }
-
-            yield break;
         }
     }
 }

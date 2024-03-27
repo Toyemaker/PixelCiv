@@ -59,8 +59,6 @@ namespace PixelCiv.Core.UI
             {
                 yield return t;
             }
-
-            yield break;
         }
     }
 }
