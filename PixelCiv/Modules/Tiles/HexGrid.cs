@@ -73,13 +73,29 @@ namespace PixelCiv.Modules.Tiles
             }
         };
 
-        public int _gridRadius { get; private set; }
+        public int GridRadius { get; private set; }
+        
+        private HexTile this[int x, int y]
+        {
+            get
+            {
+                return _tileDictionary[new Point(x, y)];
+            }
+        }
+        private HexTile this[Point point]
+        {
+            get
+            {
+                return _tileDictionary[point];
+            }
+        }
+
 
         public HexGrid()
         {
             _tileDictionary = new Dictionary<Point, HexTile>();
 
-            _gridRadius = 10;
+            GridRadius = 10;
 
             Generate();
 
@@ -93,12 +109,12 @@ namespace PixelCiv.Modules.Tiles
 
         public void Generate()
         {
-            for (int y = -_gridRadius; y <= _gridRadius; y++)
+            for (int y = -GridRadius; y <= GridRadius; y++)
             {
-                for (int x = Math.Max(-(_gridRadius + y), -_gridRadius); x <= Math.Min(_gridRadius - y, _gridRadius); x++)
+                for (int x = Math.Max(-(GridRadius + y), -GridRadius); x <= Math.Min(GridRadius - y, GridRadius); x++)
                 {
-                    int xPos = x + _gridRadius;
-                    int yPos = y + _gridRadius / 2;
+                    int xPos = x + GridRadius;
+                    int yPos = y + GridRadius / 2;
                     
                     HexTile tile = new HexTile();
                     tile.Transform.Position = new Vector2(xPos * 11, xPos * 4 + yPos * 8);
@@ -114,59 +130,57 @@ namespace PixelCiv.Modules.Tiles
             }
         }
 
-        //public void Spread(Point point, float tempFactor, float altitudeFactor, float humidityFactor, int spread, int step = 0)
-        //{
-        //    if (tempFactor != 0)
-        //    {
-        //        _tileDictionary[point].Temperature = tempFactor * spread / (spread + step);
-        //    }
-        //    if (altitudeFactor != 0)
-        //    {
-        //        _tileDictionary[point].Altitude = altitudeFactor * spread / (spread +step);
-        //    }
-        //    if (humidityFactor != 0)
-        //    {
-        //        _tileDictionary[point].Humidity = humidityFactor * spread / (spread + step);
-        //    }
-
-        //    if (spread <= 1)
-        //    {
-        //        _tileDictionary[point].GetChild<Sprite2D>("sprite").Color = GetBiomeColor(_tileDictionary[point].Temperature, _tileDictionary[point].Altitude, _tileDictionary[point].Humidity);
-        //        return;
-        //    }
-
-        //    for (int y = -1; y <= 1; y++)
-        //    {
-        //        for (int x = Math.Max(-(1 + y), -1); x <= Math.Min(1 - y, 1); x++)
-        //        {
-        //            if ((x == y && x == 0) || !_tileDictionary.ContainsKey(point + new Point(x, y)))
-        //            {
-        //                continue;
-        //            }
-
-        //            if ((tempFactor != 0 && _tileDictionary[point + new Point(x, y)].Temperature > tempFactor) ||
-        //                (altitudeFactor != 0 && _tileDictionary[point + new Point(x, y)].Altitude > altitudeFactor) ||
-        //                (humidityFactor != 0 && _tileDictionary[point + new Point(x, y)].Humidity > humidityFactor))
-        //            {
-        //                continue;
-        //            }
-
-        //            float ran = _random.Next(spread + step + 1);
-
-        //            if (ran < spread)
-        //            {
-        //                Spread(point + new Point(x, y), tempFactor * (1 - (1f / spread)), altitudeFactor, humidityFactor * (1 - (1f / spread)), spread - 1, step + 1);
-        //            }
-        //        }
-        //    }
-
-        //    _tileDictionary[point].GetChild<Sprite2D>("sprite").Color = GetBiomeColor(_tileDictionary[point].Temperature, _tileDictionary[point].Altitude, _tileDictionary[point].Humidity);
-        //}
-
-
-        public void Spread(Point point, float factor, int spread, int step = 0)
+        public void Spread(Point point, int radius)
         {
+            float minTemp = 1f;
 
+            this[point].Temperature = 1;
+            this[point].GetChild<Sprite2D>("sprite").Color = GetBiomeColor(1f, 0.25f, 0f);
+
+            SpreadAdjacent(point, 1 - (1f / radius));
+
+            for (int r = 1; r <= radius; r++)
+            {
+                for (int t = 0; t < r; t++)
+                {
+                    for (int i = 0; i < 6; i++)
+                    {
+                        int x = Math.Sign(((i + 3) % 6 - 3) % 3) * r + Math.Sign(((i + 1) % 6 - 3) % 3) * t;
+                        int y = Math.Sign(((i + 5) % 6 - 3) % 3) * r + Math.Sign(((i + 3) % 6 - 3) % 3) * t;
+
+                        if (Contains(point + new Point(x, y)) && this[point + new Point(x, y)].Temperature > 0)
+                        {
+                            if (_random.NextSingle() < 1 - ((float)r / radius))
+                            {
+                                SpreadAdjacent(point + new Point(x, y), 1 - ((float)r / radius));
+
+                                if (1 - ((float)r / radius) < minTemp)
+                                {
+                                    minTemp = 1 - ((float)r / radius);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        public void SpreadAdjacent(Point point, float strength)
+        {
+            for (int i = 0; i < 6; i++)
+            {
+                int x = Math.Sign(((i + 3) % 6 - 3) % 3);
+                int y = Math.Sign(((i + 5) % 6 - 3) % 3);
+
+                if (Contains(point + new Point(x, y)) && this[point + new Point(x, y)].Temperature < strength)
+                {
+                    if (_random.NextSingle() < strength)
+                    {
+                        this[point + new Point(x, y)].Temperature = strength;
+                        this[point + new Point(x, y)].GetChild<Sprite2D>("sprite").Color = GetBiomeColor(strength, 0.25f, 0f);
+                    }
+                }
+            }
         }
 
         public Color GetBiomeColor(float temp, float altitude, float humidity)
@@ -183,6 +197,11 @@ namespace PixelCiv.Modules.Tiles
                 return BiomeColors[tempIndex][humidityIndex];
             }
             
+        }
+
+        private bool Contains(Point point)
+        {
+            return _tileDictionary.ContainsKey(point);
         }
     }
 }
