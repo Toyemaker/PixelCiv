@@ -61,7 +61,7 @@ namespace PixelCiv.Modules.Scenes
                     {
                         int y = random.Next(-grid.GridRadius, grid.GridRadius + 1);
                         int x = random.Next(Math.Max(-(grid.GridRadius + y), -grid.GridRadius), Math.Min(grid.GridRadius - y, grid.GridRadius) + 1);
-                        grid.Spread(new Point(x, y), 8);
+                        grid.Spread(new Point(x, y), 6);
                     }
                 }
 

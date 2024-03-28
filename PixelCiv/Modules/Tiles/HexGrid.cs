@@ -191,9 +191,8 @@ namespace PixelCiv.Modules.Tiles
             }
             else
             {
-                int tempIndex = Math.Clamp((int)Math.Floor((BiomeColors.Count) * temp), 0, BiomeColors.Count - 1);
-                int humidityIndex = Math.Clamp((int)Math.Floor((BiomeColors[tempIndex].Count) * humidity), 0, BiomeColors[tempIndex].Count - 1);
-
+                int tempIndex = (int)Math.Clamp((BiomeColors.Count - 1) * temp, 0, BiomeColors.Count - 1);
+                int humidityIndex = (int)Math.Clamp((BiomeColors[tempIndex].Count - 1) * humidity, 0, BiomeColors[tempIndex].Count - 1);
                 return BiomeColors[tempIndex][humidityIndex];
             }
             
