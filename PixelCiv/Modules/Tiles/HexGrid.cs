@@ -73,7 +73,7 @@ namespace PixelCiv.Modules.Tiles
             }
         };
 
-        public int GridRadius { get; private set; }
+        public int TileRadius { get; private set; }
         
         private HexTile this[int x, int y]
         {
@@ -95,7 +95,7 @@ namespace PixelCiv.Modules.Tiles
         {
             _tileDictionary = new Dictionary<Point, HexTile>();
 
-            GridRadius = 50;
+            TileRadius = 50;
 
             Generate();
 
@@ -109,12 +109,12 @@ namespace PixelCiv.Modules.Tiles
 
         public void Generate()
         {
-            for (int y = -GridRadius; y <= GridRadius; y++)
+            for (int y = -TileRadius; y <= TileRadius; y++)
             {
-                for (int x = Math.Max(-(GridRadius + y), -GridRadius); x <= Math.Min(GridRadius - y, GridRadius); x++)
+                for (int x = Math.Max(-(TileRadius + y), -TileRadius); x <= Math.Min(TileRadius - y, TileRadius); x++)
                 {
-                    int xPos = x + GridRadius;
-                    int yPos = y + GridRadius / 2;
+                    int xPos = x + TileRadius;
+                    int yPos = y + TileRadius / 2;
                     
                     HexTile tile = new HexTile();
                     tile.Transform.Position = new Vector2(xPos * 11, xPos * 4 + yPos * 8);
@@ -130,57 +130,87 @@ namespace PixelCiv.Modules.Tiles
             }
         }
 
-        public void Spread(Point point, int radius)
+        public IEnumerable<Point> GetAdjacent(Point point)
         {
-            this[point].Temperature = 5;
-            this[point].GetChild<Sprite2D>("sprite").Color = GetBiomeColor(5, 0.25f, 0f);
-
-            SpreadDirection(point, 0, 5, 0.25f);
-            SpreadDirection(point, 1, 5, 0.25f);
-            SpreadDirection(point, 2, 5, 0.25f);
-            SpreadDirection(point, 3, 5, 0.25f);
-            SpreadDirection(point, 4, 5, 0.25f);
-            SpreadDirection(point, 5, 5, 0.25f);
-
-            //for (int r = 1; r <= 2 * radius; r++)
-            //{
-            //    for (int t = 0; t < r; t++)
-            //    {
-            //        for (int i = 0; i < 6; i++)
-            //        {
-            //            int x = Math.Sign(((i + 3) % 6 - 3) % 3) * r + Math.Sign(((i + 1) % 6 - 3) % 3) * t;
-            //            int y = Math.Sign(((i + 5) % 6 - 3) % 3) * r + Math.Sign(((i + 3) % 6 - 3) % 3) * t;
-
-            //            if (Contains(point + new Point(x, y)) && this[point + new Point(x, y)].Temperature > 0)
-            //            {
-            //                int temp = this[point + new Point(x, y)].Temperature;
-
-            //                SpreadDirection(point + new Point(x, y), i, temp, radius / (2f * GridRadius));
-            //            }
-            //        }
-            //    }
-            //}
+            foreach (int i in Enumerable.Range(0, 6).OrderBy(x => _random.Next()))
+            {
+                int x = Math.Sign(((i + 3) % 6 - 3) % 3);
+                int y = Math.Sign(((i + 5) % 6 - 3) % 3);
+                
+                if (Contains(point + new Point(x, y)))
+                {
+                    yield return point + new Point(x, y);
+                }
+            }
         }
 
-        public void SpreadDirection(Point point, int direction, int strength, float decay)
+        public void Spread(Point point, int radius, int strength)
         {
-            int x = Math.Sign(((direction + 3) % 6 - 3) % 3);
-            int y = Math.Sign(((direction + 5) % 6 - 3) % 3);
+            this[point].Temperature = strength;
+            this[point].GetChild<Sprite2D>("sprite").Color = GetBiomeColor(strength, 0.25f, 0f);
 
-            if (Contains(point + new Point(x, y)) && this[point + new Point(x, y)].Temperature < strength)
+            int maxSteps = (int)Math.Round(radius / (strength + 1.0) * Math.Log(radius + 1.0) / 2.0);
+            float chance = 1f;
+
+            List<Point> points = SpreadAdjacent(point, strength, chance, maxSteps).ToList();
+            
+            for (int i = strength - 1; i >= 0; i--)
             {
-                if (_random.NextSingle() < decay)
+                List<Point> nextPoints = points.ToList();
+                points.Clear();
+                foreach (var tile in nextPoints)
                 {
-                    this[point + new Point(x, y)].Temperature = strength;
+                    foreach (var next in GetAdjacent(tile))
+                    {
+                        if (this[next].Temperature == 0)
+                        {
+                            this[next].Temperature = i;
+                            this[next].GetChild<Sprite2D>("sprite").Color = GetBiomeColor(i, 0.25f, 0f);
+                        }
+                        points.AddRange(SpreadAdjacent(next, i, chance, maxSteps).ToList());
+                    }
+                }
+            }
+
+            
+        }
+
+        public IEnumerable<Point> SpreadAdjacent(Point point, int strength, float chance, int maxSteps, int step = 1)
+        {
+            if (step >= maxSteps)
+            {
+                yield return point;
+                yield break;
+            }
+
+            bool passed = true;
+
+            foreach (Point tile in GetAdjacent(point))
+            {
+                if (this[tile].Temperature >= strength)
+                {
+                    continue;
+                }
+
+                if (_random.NextSingle() < chance)
+                {
+                    this[tile].Temperature = strength;
+                    this[tile].GetChild<Sprite2D>("sprite").Color = GetBiomeColor(strength, 0.25f, 0f);
+
+                    foreach (Point next in SpreadAdjacent(tile, strength, chance, maxSteps, step + 1))
+                    {
+                        yield return next;
+                    }
                 }
                 else
                 {
-                    this[point + new Point(x, y)].Temperature = strength - 1;
+                    passed = false;
                 }
+            }
 
-                SpreadDirection(point + new Point(x, y), direction, this[point + new Point(x, y)].Temperature, decay * 0.9f);
-
-                this[point + new Point(x, y)].GetChild<Sprite2D>("sprite").Color = GetBiomeColor(this[point + new Point(x, y)].Temperature, 0.25f, 0f);
+            if (!passed)
+            {
+                yield return point;
             }
         }
 

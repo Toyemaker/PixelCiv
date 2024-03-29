@@ -54,14 +54,27 @@ namespace PixelCiv.Modules.Scenes
                 Random random = new Random();
                 for (int i = 0; i < 10; i++)
                 {
-                    int y = random.Next(-grid.GridRadius, grid.GridRadius + 1);
-                    int x = random.Next(Math.Max(-(grid.GridRadius + y), -grid.GridRadius), Math.Min(grid.GridRadius - y, grid.GridRadius) + 1);
+                    int y = random.Next(-grid.TileRadius, grid.TileRadius + 1);
+                    int x = random.Next(Math.Max(-(grid.TileRadius + y), -grid.TileRadius), Math.Min(grid.TileRadius - y, grid.TileRadius) + 1);
                     //grid.Spread(new Point(x, y), 5);
                 }
                 //grid.Spread(new Point(0, -45), 50);
                 //grid.Spread(new Point(0, 45), 50);
 
-                grid.Spread(new Point(0, 0), 50);
+                //grid.Spread(new Point(0, 0), 50);
+
+                grid.Spread(new Point(-50, 0), 50, 3);
+                grid.Spread(new Point(-25, -25), 50, 3);
+                grid.Spread(new Point(0, -50), 80, 5);
+                grid.Spread(new Point(25, -50), 50, 3);
+                grid.Spread(new Point(50, -50), 50, 3);
+
+
+                grid.Spread(new Point(50, 0), 50, 3);
+                grid.Spread(new Point(25, 25), 50, 3);
+                grid.Spread(new Point(0, 50), 80, 5);
+                grid.Spread(new Point(-25, 50), 50, 3);
+                grid.Spread(new Point(-50, 50), 50, 3);
             }
             else if (input.IsKeyPressed(Keys.LeftControl))
             {
