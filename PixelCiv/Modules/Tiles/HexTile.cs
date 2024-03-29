@@ -19,7 +19,7 @@ namespace PixelCiv.Modules.Tiles
     public class HexTile : GameObject
     {
         public float Altitude { get; set; }
-        public float Temperature { get; set; }
+        public int Temperature { get; set; }
         public float Humidity { get; set; }
 
         public bool IsModified { get; set; }

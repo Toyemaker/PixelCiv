@@ -95,7 +95,7 @@ namespace PixelCiv.Modules.Tiles
         {
             _tileDictionary = new Dictionary<Point, HexTile>();
 
-            GridRadius = 10;
+            GridRadius = 50;
 
             Generate();
 
@@ -132,58 +132,59 @@ namespace PixelCiv.Modules.Tiles
 
         public void Spread(Point point, int radius)
         {
-            float minTemp = 1f;
+            this[point].Temperature = 5;
+            this[point].GetChild<Sprite2D>("sprite").Color = GetBiomeColor(5, 0.25f, 0f);
 
-            this[point].Temperature = 1;
-            this[point].GetChild<Sprite2D>("sprite").Color = GetBiomeColor(1f, 0.25f, 0f);
+            SpreadDirection(point, 0, 5, 0.25f);
+            SpreadDirection(point, 1, 5, 0.25f);
+            SpreadDirection(point, 2, 5, 0.25f);
+            SpreadDirection(point, 3, 5, 0.25f);
+            SpreadDirection(point, 4, 5, 0.25f);
+            SpreadDirection(point, 5, 5, 0.25f);
 
-            SpreadAdjacent(point, 1 - (1f / radius));
+            //for (int r = 1; r <= 2 * radius; r++)
+            //{
+            //    for (int t = 0; t < r; t++)
+            //    {
+            //        for (int i = 0; i < 6; i++)
+            //        {
+            //            int x = Math.Sign(((i + 3) % 6 - 3) % 3) * r + Math.Sign(((i + 1) % 6 - 3) % 3) * t;
+            //            int y = Math.Sign(((i + 5) % 6 - 3) % 3) * r + Math.Sign(((i + 3) % 6 - 3) % 3) * t;
 
-            for (int r = 1; r <= radius; r++)
-            {
-                for (int t = 0; t < r; t++)
-                {
-                    for (int i = 0; i < 6; i++)
-                    {
-                        int x = Math.Sign(((i + 3) % 6 - 3) % 3) * r + Math.Sign(((i + 1) % 6 - 3) % 3) * t;
-                        int y = Math.Sign(((i + 5) % 6 - 3) % 3) * r + Math.Sign(((i + 3) % 6 - 3) % 3) * t;
+            //            if (Contains(point + new Point(x, y)) && this[point + new Point(x, y)].Temperature > 0)
+            //            {
+            //                int temp = this[point + new Point(x, y)].Temperature;
 
-                        if (Contains(point + new Point(x, y)) && this[point + new Point(x, y)].Temperature > 0)
-                        {
-                            if (_random.NextSingle() < 1 - ((float)r / radius))
-                            {
-                                SpreadAdjacent(point + new Point(x, y), 1 - ((float)r / radius));
-
-                                if (1 - ((float)r / radius) < minTemp)
-                                {
-                                    minTemp = 1 - ((float)r / radius);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+            //                SpreadDirection(point + new Point(x, y), i, temp, radius / (2f * GridRadius));
+            //            }
+            //        }
+            //    }
+            //}
         }
 
-        public void SpreadAdjacent(Point point, float strength)
+        public void SpreadDirection(Point point, int direction, int strength, float decay)
         {
-            for (int i = 0; i < 6; i++)
-            {
-                int x = Math.Sign(((i + 3) % 6 - 3) % 3);
-                int y = Math.Sign(((i + 5) % 6 - 3) % 3);
+            int x = Math.Sign(((direction + 3) % 6 - 3) % 3);
+            int y = Math.Sign(((direction + 5) % 6 - 3) % 3);
 
-                if (Contains(point + new Point(x, y)) && this[point + new Point(x, y)].Temperature < strength)
+            if (Contains(point + new Point(x, y)) && this[point + new Point(x, y)].Temperature < strength)
+            {
+                if (_random.NextSingle() < decay)
                 {
-                    if (_random.NextSingle() < strength)
-                    {
-                        this[point + new Point(x, y)].Temperature = strength;
-                        this[point + new Point(x, y)].GetChild<Sprite2D>("sprite").Color = GetBiomeColor(strength, 0.25f, 0f);
-                    }
+                    this[point + new Point(x, y)].Temperature = strength;
                 }
+                else
+                {
+                    this[point + new Point(x, y)].Temperature = strength - 1;
+                }
+
+                SpreadDirection(point + new Point(x, y), direction, this[point + new Point(x, y)].Temperature, decay * 0.9f);
+
+                this[point + new Point(x, y)].GetChild<Sprite2D>("sprite").Color = GetBiomeColor(this[point + new Point(x, y)].Temperature, 0.25f, 0f);
             }
         }
 
-        public Color GetBiomeColor(float temp, float altitude, float humidity)
+        public Color GetBiomeColor(int temperature, float altitude, float humidity)
         {
             if (altitude < 0.25)
             {
@@ -191,9 +192,8 @@ namespace PixelCiv.Modules.Tiles
             }
             else
             {
-                int tempIndex = (int)Math.Clamp((BiomeColors.Count - 1) * temp, 0, BiomeColors.Count - 1);
-                int humidityIndex = (int)Math.Clamp((BiomeColors[tempIndex].Count - 1) * humidity, 0, BiomeColors[tempIndex].Count - 1);
-                return BiomeColors[tempIndex][humidityIndex];
+                int humidityIndex = (int)Math.Clamp((BiomeColors[temperature].Count - 1) * humidity, 0, BiomeColors[temperature].Count - 1);
+                return BiomeColors[temperature][humidityIndex];
             }
             
         }

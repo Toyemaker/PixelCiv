@@ -26,8 +26,6 @@ namespace PixelCiv.Modules.Scenes
         private float _timer;
         private float _tickInterval;
 
-        private int _counter;
-
         public TestScene() 
         {
             _screenRoot = new GameObject();
@@ -54,24 +52,23 @@ namespace PixelCiv.Modules.Scenes
             if (input.IsKeyPressed(Keys.Space))
             {
                 Random random = new Random();
-
-                if (_counter < 1)
+                for (int i = 0; i < 10; i++)
                 {
-                    for (int i = 0; i < 10; i++)
-                    {
-                        int y = random.Next(-grid.GridRadius, grid.GridRadius + 1);
-                        int x = random.Next(Math.Max(-(grid.GridRadius + y), -grid.GridRadius), Math.Min(grid.GridRadius - y, grid.GridRadius) + 1);
-                        grid.Spread(new Point(x, y), 6);
-                    }
+                    int y = random.Next(-grid.GridRadius, grid.GridRadius + 1);
+                    int x = random.Next(Math.Max(-(grid.GridRadius + y), -grid.GridRadius), Math.Min(grid.GridRadius - y, grid.GridRadius) + 1);
+                    //grid.Spread(new Point(x, y), 5);
                 }
+                //grid.Spread(new Point(0, -45), 50);
+                //grid.Spread(new Point(0, 45), 50);
 
-                _counter++;
+                grid.Spread(new Point(0, 0), 50);
             }
             else if (input.IsKeyPressed(Keys.LeftControl))
             {
                 foreach (HexTile tile in grid.GetChildren<HexTile>())
                 {
-                    tile.GetChild<Sprite2D>("sprite").Color = grid.GetBiomeColor(tile.Temperature, tile.Altitude, tile.Humidity);
+                    tile.Temperature = 0;
+                    tile.GetChild<Sprite2D>("sprite").Color = grid.GetBiomeColor(tile.Temperature, 0.25f, 0);
                 }
             }
             if (!_screenRoot.Interact(input, gameTime))
