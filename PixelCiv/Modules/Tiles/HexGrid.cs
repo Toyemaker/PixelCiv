@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace PixelCiv.Modules.Tiles
 {
@@ -75,14 +76,7 @@ namespace PixelCiv.Modules.Tiles
 
         public int TileRadius { get; private set; }
         
-        private HexTile this[int x, int y]
-        {
-            get
-            {
-                return _tileDictionary[new Point(x, y)];
-            }
-        }
-        private HexTile this[Point point]
+        public HexTile this[Point point]
         {
             get
             {
@@ -144,17 +138,19 @@ namespace PixelCiv.Modules.Tiles
             }
         }
 
-        public void Spread(Point point, int radius, int strength)
+        public void Spread(Point point, int radius, int strength, int category)
         {
-            this[point].Temperature = strength;
-            this[point].GetChild<Sprite2D>("sprite").Color = GetBiomeColor(strength, 0.25f, 0f);
+            if (this[point].GetCategory(category) < strength)
+            {
+                this[point].SetCategory(category, strength);
+            }
 
             int maxSteps = (int)Math.Round(radius / (strength + 1.0) * Math.Log(radius + 1.0) / 2.0);
-            float chance = 1f;
+            float chance = 0.5f;
 
-            List<Point> points = SpreadAdjacent(point, strength, chance, maxSteps).ToList();
+            List<Point> points = SpreadAdjacent(point, strength, chance, category, maxSteps).ToList();
             
-            for (int i = strength - 1; i >= 0; i--)
+            for (int i = strength; i >= 0; i--)
             {
                 List<Point> nextPoints = points.ToList();
                 points.Clear();
@@ -162,20 +158,23 @@ namespace PixelCiv.Modules.Tiles
                 {
                     foreach (var next in GetAdjacent(tile))
                     {
-                        if (this[next].Temperature == 0)
+                        if (this[next].GetCategory(category) < i)
                         {
-                            this[next].Temperature = i;
-                            this[next].GetChild<Sprite2D>("sprite").Color = GetBiomeColor(i, 0.25f, 0f);
+                            this[next].SetCategory(category, i);
                         }
-                        points.AddRange(SpreadAdjacent(next, i, chance, maxSteps).ToList());
+
+                        points.AddRange(SpreadAdjacent(next, i, chance, category, maxSteps).ToList());
                     }
                 }
             }
 
-            
+            foreach(HexTile tile in _tileDictionary.Values)
+            {
+                tile.IsModified = false;                
+            }
         }
 
-        public IEnumerable<Point> SpreadAdjacent(Point point, int strength, float chance, int maxSteps, int step = 1)
+        public IEnumerable<Point> SpreadAdjacent(Point point, int strength, float chance, int category, int maxSteps, int step = 1)
         {
             if (step >= maxSteps)
             {
@@ -187,17 +186,17 @@ namespace PixelCiv.Modules.Tiles
 
             foreach (Point tile in GetAdjacent(point))
             {
-                if (this[tile].Temperature >= strength)
+                if (this[tile].IsModified || this[tile].GetCategory(category) > strength)
                 {
                     continue;
                 }
 
                 if (_random.NextSingle() < chance)
                 {
-                    this[tile].Temperature = strength;
-                    this[tile].GetChild<Sprite2D>("sprite").Color = GetBiomeColor(strength, 0.25f, 0f);
+                    this[tile].SetCategory(category, strength);
+                    this[tile].IsModified = true;
 
-                    foreach (Point next in SpreadAdjacent(tile, strength, chance, maxSteps, step + 1))
+                    foreach (Point next in SpreadAdjacent(tile, strength, chance, category, maxSteps, step + 1))
                     {
                         yield return next;
                     }
@@ -214,18 +213,22 @@ namespace PixelCiv.Modules.Tiles
             }
         }
 
-        public Color GetBiomeColor(int temperature, float altitude, float humidity)
+        public Color GetBiomeColor(int temperature, int altitude, int humidity)
         {
-            if (altitude < 0.25)
+            if (temperature == 5)
             {
-                return new Color(altitude, altitude * 2, 255);
+                return Color.White;
             }
-            else
+            else if (altitude < 2)
             {
-                int humidityIndex = (int)Math.Clamp((BiomeColors[temperature].Count - 1) * humidity, 0, BiomeColors[temperature].Count - 1);
-                return BiomeColors[temperature][humidityIndex];
+                return new Color(0, 0, (altitude + 1) * 255 / 2);
             }
-            
+            else if (altitude == 2)
+            {
+                return BiomeColors[Math.Clamp(temperature + altitude - 3, 0, 5)][Math.Clamp(humidity + 1, 0, BiomeColors[Math.Clamp(temperature + altitude - 3, 0, 5)].Count - 1)];
+            }
+
+            return BiomeColors[Math.Clamp(temperature + altitude - 3, 0, 5)][Math.Clamp(humidity, 0, BiomeColors[Math.Clamp(temperature + altitude - 3, 0, 5)].Count - 1)];
         }
 
         private bool Contains(Point point)

@@ -18,9 +18,9 @@ namespace PixelCiv.Modules.Tiles
 {
     public class HexTile : GameObject
     {
-        public float Altitude { get; set; }
+        public int Altitude { get; set; }
         public int Temperature { get; set; }
-        public float Humidity { get; set; }
+        public int Humidity { get; set; }
 
         public bool IsModified { get; set; }
 
@@ -75,6 +75,26 @@ namespace PixelCiv.Modules.Tiles
             }
 
             return base.Interact(input, gameTime);
+        }
+
+        public int GetCategory(int category)
+        {
+            return category switch
+            {
+                0 => Temperature,
+                1 => Altitude,
+                2 => Humidity,
+                _ => 0,
+            };
+        }
+        public void SetCategory(int category, int value)
+        {
+            switch (category)
+            {
+                case 0: Temperature = value; break;
+                case 1: Altitude = value; break;
+                case 2: Humidity = value; break;
+            }
         }
     }
 }

@@ -51,37 +51,70 @@ namespace PixelCiv.Modules.Scenes
             HexGrid grid = _worldRoot.GetChild<HexGrid>("grid");
             if (input.IsKeyPressed(Keys.Space))
             {
+                grid.Spread(new Point(-grid.TileRadius / 2, -grid.TileRadius / 2), grid.TileRadius, 3, 0);
+                grid.Spread(new Point(grid.TileRadius / 2, -grid.TileRadius), grid.TileRadius, 3, 0);
+                grid.Spread(new Point(0, -grid.TileRadius), grid.TileRadius, 5, 0);
+
+                grid.Spread(new Point(grid.TileRadius / 2, grid.TileRadius / 2), grid.TileRadius, 3, 0);
+                grid.Spread(new Point(-grid.TileRadius / 2, grid.TileRadius), grid.TileRadius, 3, 0);
+                grid.Spread(new Point(0, grid.TileRadius), grid.TileRadius, 5, 0);
+
                 Random random = new Random();
+
                 for (int i = 0; i < 10; i++)
                 {
                     int y = random.Next(-grid.TileRadius, grid.TileRadius + 1);
                     int x = random.Next(Math.Max(-(grid.TileRadius + y), -grid.TileRadius), Math.Min(grid.TileRadius - y, grid.TileRadius) + 1);
-                    //grid.Spread(new Point(x, y), 5);
+
+                    grid.Spread(new Point(x, y), grid.TileRadius / 3, 5, 1);
                 }
-                //grid.Spread(new Point(0, -45), 50);
-                //grid.Spread(new Point(0, 45), 50);
 
-                //grid.Spread(new Point(0, 0), 50);
+                int max = grid.TileRadius / 3;
+                for (int x = max; x >= -max; x--)
+                {
+                    if (grid[new Point(grid.TileRadius * x / max, -grid.TileRadius / 2 * x / max)].Altitude > 4)
+                    {
+                        x -= max;
+                        continue;
+                    }
 
-                grid.Spread(new Point(-50, 0), 50, 3);
-                grid.Spread(new Point(-25, -25), 50, 3);
-                grid.Spread(new Point(0, -50), 80, 5);
-                grid.Spread(new Point(25, -50), 50, 3);
-                grid.Spread(new Point(50, -50), 50, 3);
+                    grid.Spread(new Point(grid.TileRadius * x / max, -grid.TileRadius / 2 * x / max), grid.TileRadius / 4, 5, 2);
+                }
+                max = grid.TileRadius / 6;
+                for (int x = -max; x <= max; x++)
+                {
+                    if (grid[new Point(grid.TileRadius * 2 / 3 * x / max, -grid.TileRadius / 3 * x / max - 20 - grid.TileRadius * 1 / 9)].Altitude > 4)
+                    {
+                        x += max;
+                        continue;
+                    }
 
+                    grid.Spread(new Point(grid.TileRadius * 2 / 3 * x / max, -grid.TileRadius / 3 * x / max - 20 - grid.TileRadius * 1 / 9), grid.TileRadius * 2 / 9, 5, 2);
+                }
+                for (int x = -max; x <= max; x++)
+                {
+                    if (grid[new Point(grid.TileRadius * 2 / 3 * x / max, -grid.TileRadius / 3 * x / max + 20 + grid.TileRadius * 1 / 9)].Altitude > 4)
+                    {
+                        x += max;
+                        continue;
+                    }
 
-                grid.Spread(new Point(50, 0), 50, 3);
-                grid.Spread(new Point(25, 25), 50, 3);
-                grid.Spread(new Point(0, 50), 80, 5);
-                grid.Spread(new Point(-25, 50), 50, 3);
-                grid.Spread(new Point(-50, 50), 50, 3);
+                    grid.Spread(new Point(grid.TileRadius * 2 / 3 * x / max, -grid.TileRadius / 3 * x / max + 20 + grid.TileRadius * 1 / 9), grid.TileRadius * 2 / 9, 5, 2);
+                }
+
+                foreach (HexTile tile in grid.GetChildren<HexTile>())
+                {
+                    tile.GetChild<Sprite2D>("sprite").Color = grid.GetBiomeColor(tile.Temperature, tile.Altitude, tile.Humidity);
+                }
             }
             else if (input.IsKeyPressed(Keys.LeftControl))
             {
                 foreach (HexTile tile in grid.GetChildren<HexTile>())
                 {
                     tile.Temperature = 0;
-                    tile.GetChild<Sprite2D>("sprite").Color = grid.GetBiomeColor(tile.Temperature, 0.25f, 0);
+                    tile.Altitude = 0;
+                    tile.Humidity = 0;
+                    tile.GetChild<Sprite2D>("sprite").Color = grid.GetBiomeColor(tile.Temperature, 0, 0);
                 }
             }
             if (!_screenRoot.Interact(input, gameTime))
@@ -98,6 +131,7 @@ namespace PixelCiv.Modules.Scenes
             _worldRoot.Update(gameTime);
 
             _timer += (float)gameTime.ElapsedGameTime.TotalSeconds;
+
 
             if (_timer >= _tickInterval)
             {
