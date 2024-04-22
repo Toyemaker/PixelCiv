@@ -16,7 +16,8 @@ namespace PixelCiv.Core
         private MouseState _previousMouseState;
         private MouseState _currentMouseState;
 
-        private Vector2 _mousePosition;
+        private Vector2 _currentPosition;
+        private Vector2 _previousPosition;
 
         public void SetKeyboardState(KeyboardState state)
         {
@@ -32,7 +33,7 @@ namespace PixelCiv.Core
 
         public void SetMousePosition(Vector2 position)
         {
-            _mousePosition = position;
+            _currentPosition = position;
         }
 
         public bool IsKeyDown(Keys key)
@@ -104,7 +105,7 @@ namespace PixelCiv.Core
 
         public Vector2 GetMousePosition()
         {
-            return _mousePosition;
+            return _currentPosition;
         }
     }
 

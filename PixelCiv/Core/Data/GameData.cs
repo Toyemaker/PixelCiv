@@ -19,6 +19,8 @@ namespace PixelCiv.Core.Data
 
         public static SpriteFont BaseFont;
 
+        public static Rectangle ScreenResolution;
+
         public static void Load(ContentManager content, GraphicsDevice graphics)
         {
             BaseTileTexture = content.Load<Texture2D>("Textures/Tiles/tile_hex_blank");

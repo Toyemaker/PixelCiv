@@ -7,7 +7,9 @@ using PixelCiv.Modules.Displays;
 using PixelCiv.Modules.Logistics;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using static System.Net.Mime.MediaTypeNames;
@@ -98,6 +100,13 @@ namespace PixelCiv.Modules.Tiles
 
         public override bool Interact(Input input, GameTime gameTime)
         {
+            Point point = GetTileAtPoint(input.GetMousePosition());
+
+            if (Contains(point))
+            {
+                return this[point].Interact(input, gameTime);
+            }
+
             return false;
         }
 
@@ -234,6 +243,13 @@ namespace PixelCiv.Modules.Tiles
         private bool Contains(Point point)
         {
             return _tileDictionary.ContainsKey(point);
+        }
+
+        public Point GetTileAtPoint(Vector2 point)
+        {
+            Point tilePos = new Point((int)Math.Floor(point.X / 11 - TileRadius), (int)Math.Floor((point.Y - 4 * (point.X / 11)) / 8 - TileRadius / 2));
+
+            return tilePos;
         }
     }
 }

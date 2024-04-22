@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using PixelCiv.Core;
@@ -10,6 +11,7 @@ using PixelCiv.Modules.Logistics;
 using PixelCiv.Modules.Tiles;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -26,7 +28,7 @@ namespace PixelCiv.Modules.Scenes
         private float _timer;
         private float _tickInterval;
 
-        public TestScene() 
+        public TestScene(ContentManager content, GraphicsDevice graphics) 
         {
             _screenRoot = new GameObject();
             _screenRoot.AddComponent("logisticsManager", new LogisticsManager());
@@ -42,6 +44,7 @@ namespace PixelCiv.Modules.Scenes
             _screenRoot.GetChild<GameObject>("buildingMenu").Transform.Position = new Vector2(0, 480 - 86);
 
             _camera = new Camera();
+            _screenRoot.AddComponent("camera", _camera);
 
             _tickInterval = 0.05f;
         }
@@ -104,7 +107,7 @@ namespace PixelCiv.Modules.Scenes
 
                 foreach (HexTile tile in grid.GetChildren<HexTile>())
                 {
-                    tile.GetChild<Sprite2D>("sprite").Color = grid.GetBiomeColor(tile.Temperature, tile.Altitude, tile.Humidity);
+                    tile.Color = grid.GetBiomeColor(tile.Temperature, tile.Altitude, tile.Humidity);
                 }
             }
             else if (input.IsKeyPressed(Keys.LeftControl))
@@ -114,12 +117,13 @@ namespace PixelCiv.Modules.Scenes
                     tile.Temperature = 0;
                     tile.Altitude = 0;
                     tile.Humidity = 0;
-                    tile.GetChild<Sprite2D>("sprite").Color = grid.GetBiomeColor(tile.Temperature, 0, 0);
+                    tile.Color = grid.GetBiomeColor(tile.Temperature, 0, 0);
                 }
             }
+
             if (!_screenRoot.Interact(input, gameTime))
             {
-                input.SetMousePosition(_camera.ConvertToWorldPosition(Mouse.GetState().Position.ToVector2()));
+                input.SetMousePosition(_camera.ConvertToWorldPosition(input.GetMousePosition()));
                 return _worldRoot.Interact(input, gameTime);
             }
 

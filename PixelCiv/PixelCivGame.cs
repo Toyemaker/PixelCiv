@@ -21,6 +21,7 @@ namespace PixelCiv
 
         private TestScene _scene;
         private Input _input;
+        private RenderTarget2D _renderTarget;
 
         public PixelCivGame()
         {
@@ -33,6 +34,12 @@ namespace PixelCiv
         {
             // TODO: Add your initialization logic here
 
+            Window.AllowUserResizing = true;
+
+            GameData.ScreenResolution = new Rectangle(0, 0, 1280, 720);
+
+            _renderTarget = new RenderTarget2D(_graphics.GraphicsDevice, GameData.ScreenResolution.Width, GameData.ScreenResolution.Height);
+
             base.Initialize();
         }
 
@@ -44,7 +51,7 @@ namespace PixelCiv
 
             GameData.Load(Content, GraphicsDevice);
 
-            _scene = new TestScene();
+            _scene = new TestScene(Content, GraphicsDevice);
             _input = new Input();
         }
 
@@ -57,7 +64,12 @@ namespace PixelCiv
 
             _input.SetKeyboardState(Keyboard.GetState());
             _input.SetMouseState(Mouse.GetState());
-            _input.SetMousePosition(Mouse.GetState().Position.ToVector2());
+
+            Vector2 pos = Mouse.GetState().Position.ToVector2();
+            pos /= _graphics.GraphicsDevice.Viewport.Bounds.Size.ToVector2();
+            pos *= GameData.ScreenResolution.Size.ToVector2();
+
+            _input.SetMousePosition(pos);
 
             _scene.Interact(_input, gameTime);
             _scene.Update(gameTime);
@@ -67,11 +79,19 @@ namespace PixelCiv
 
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
-
             // TODO: Add your drawing code here
 
+            _graphics.GraphicsDevice.SetRenderTarget(_renderTarget);
+            GraphicsDevice.Clear(Color.CornflowerBlue);
+
             _scene.Draw(_spriteBatch, gameTime);
+
+            _graphics.GraphicsDevice.SetRenderTarget(null);
+            GraphicsDevice.Clear(Color.CornflowerBlue);
+
+            _spriteBatch.Begin();
+            _spriteBatch.Draw(_renderTarget, _graphics.GraphicsDevice.Viewport.Bounds, Color.White);
+            _spriteBatch.End();
 
             base.Draw(gameTime);
         }

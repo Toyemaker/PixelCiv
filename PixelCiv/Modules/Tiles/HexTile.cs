@@ -18,16 +18,19 @@ namespace PixelCiv.Modules.Tiles
 {
     public class HexTile : GameObject
     {
+        public Color Color { get; set; }
         public int Altitude { get; set; }
         public int Temperature { get; set; }
         public int Humidity { get; set; }
 
         public bool IsModified { get; set; }
 
+        private bool _isHovered;
+
         public HexTile()
         {
             AddComponent("sprite", new Sprite2D(GameData.BaseTileTexture));
-            GetChild<Sprite2D>("sprite").Color = Color.Black;
+            Color = Color.Black;
 
             List<Vector2> vertices = new List<Vector2>()
             {
@@ -46,6 +49,15 @@ namespace PixelCiv.Modules.Tiles
 
         public override void Update(GameTime gameTime)
         {
+            if (_isHovered)
+            {
+                _isHovered = false;
+            }
+            else
+            {
+                GetChild<Sprite2D>("sprite").Color = Color;
+            }
+
             base.Update(gameTime);
         }
 
@@ -53,6 +65,11 @@ namespace PixelCiv.Modules.Tiles
         {
             if (GetChild<Polygon>("boundingBox").ContainsPoint(input.GetMousePosition()))
             {
+                Sprite2D sprite = GetChild<Sprite2D>("sprite");
+
+                sprite.Color = Color.Red;
+                _isHovered = true;
+
                 if (Parent != null && Parent is HexGrid grid && grid.GetChild<GameObject>("placeStructure") != default)
                 {
                     if (input.IsMouseButtonPressed(MouseButton.Left))
