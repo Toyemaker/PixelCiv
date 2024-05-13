@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using PixelCiv.Core;
 using PixelCiv.Core.Components;
+using PixelCiv.Core.Data;
 using PixelCiv.Core.Graphics;
 using PixelCiv.Core.UI;
 using PixelCiv.Modules.Displays;
@@ -41,7 +42,7 @@ namespace PixelCiv.Modules.Scenes
             _screenRoot.GetChild<ResourceDisplay>("display").Transform.Position = new Vector2(400, 0);
 
             _screenRoot.AddComponent("buildingMenu", new BuildingMenu(_worldRoot.GetChild<HexGrid>("grid")));
-            _screenRoot.GetChild<GameObject>("buildingMenu").Transform.Position = new Vector2(0, 480 - 86);
+            _screenRoot.GetChild<GameObject>("buildingMenu").Transform.Position = new Vector2(0, GameData.ScreenResolution.Bottom - 86);
 
             _camera = new Camera();
             _screenRoot.AddComponent("camera", _camera);

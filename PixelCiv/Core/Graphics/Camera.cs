@@ -28,7 +28,7 @@ namespace PixelCiv.Core.Graphics
 
         public Vector2 ConvertToWorldPosition(Vector2 pos)
         {
-            return pos / Transform.GetGlobalScale() - Transform.GetGlobalPosition();
+            return (pos - GameData.ScreenResolution.Size.ToVector2() / 2) / Transform.GetGlobalScale() - Transform.GetGlobalPosition();
         }
 
         public override bool Interact(Input input, GameTime gameTime)

@@ -12,7 +12,6 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace PixelCiv.Modules.Tiles
 {
@@ -100,14 +99,23 @@ namespace PixelCiv.Modules.Tiles
 
         public override bool Interact(Input input, GameTime gameTime)
         {
-            Point point = GetTileAtPoint(input.GetMousePosition());
+            Point point = ConvertToTilePos(input.GetMousePosition());
+
+            Debug.WriteLine(point);
+
+            bool interact = false;
 
             if (Contains(point))
             {
-                return this[point].Interact(input, gameTime);
+                interact = this[point].Interact(input, gameTime);
+            }
+            if (!interact && Contains(point + new Point(-1, 0)))
+            {
+                interact = this[point + new Point(-1, 0)].Interact(input, gameTime);
             }
 
-            return false;
+
+            return interact;
         }
 
         public void Generate()
@@ -245,7 +253,7 @@ namespace PixelCiv.Modules.Tiles
             return _tileDictionary.ContainsKey(point);
         }
 
-        public Point GetTileAtPoint(Vector2 point)
+        public Point ConvertToTilePos(Vector2 point)
         {
             Point tilePos = new Point((int)Math.Floor(point.X / 11 - TileRadius), (int)Math.Floor((point.Y - 4 * (point.X / 11)) / 8 - TileRadius / 2));
 
